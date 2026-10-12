@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#6f5c3f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CVA 咖啡評分器</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  :root{--bg:#f4efe6;--card:#fffdf9;--ink:#3a2f25;--sub:#8a7a67;--faint:#c9bba8;--line:#e2d8c6;--paper:#f7f3ec;
+  --bean:#6f5c3f;--bean-l:#9a8463;--accent:#c8602a;--gold:#c09a5a;--ok:#3f7a4f;
+  /* 字級手動縮放係數（Ａ＋／Ａ－ 控制，存 localStorage） */
+  --fs-scale:1}
+  html,body{height:100%}
+  body{font-family:"Noto Sans CJK TC","Noto Sans CJK SC",system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:76px}
+  header{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,#6f5c3f,#9a8463);color:#fff;padding:12px 13px;box-shadow:0 3px 14px rgba(111,92,63,.28)}
+  header h1{font-size:17.5px;font-weight:800;letter-spacing:.7px;display:flex;align-items:center;gap:7px}
+  header h1::before{content:"☕";font-size:16px}
+  header .sub{font-size:10.5px;opacity:.85;margin-top:2px}
+  .headrow{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:9px}
+  .big{font-size:36px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .big u{text-decoration:none;font-size:13.5px;font-weight:600;opacity:.85;margin-left:2px}
+  .verd{font-size:11.5px;font-weight:700;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:20px;white-space:nowrap;text-align:center;line-height:1.35}
+  .bar{height:6px;border-radius:6px;background:rgba(255,255,255,.3);margin-top:9px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:#e9cf9f;border-radius:6px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+  .wrap{padding:10px 10px 0;max-width:920px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:3px 10px;margin-bottom:10px;box-shadow:0 2px 10px rgba(111,92,63,.06)}
+  .sec-t{font-size:11.5px;font-weight:800;color:var(--bean);letter-spacing:1.1px;padding:9px 2px 2px;display:flex;align-items:center;gap:6px}
+  .sec-t::before{content:"";width:4px;height:13px;border-radius:2px;background:var(--gold)}
+  .row{display:flex;align-items:center;gap:9px;padding:8px 3px;border-bottom:1px dashed var(--line)}
+  .row:last-child{border-bottom:none}
+  .name{flex:1 1 auto;min-width:0}.name .zh{font-size:13.5px;font-weight:700;color:var(--bean)}
+  .name .en{font-size:9.5px;color:var(--sub);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .scroller{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -1px;padding:1px 0}
+  .scroller::-webkit-scrollbar{display:none}
+  .pick{display:flex;gap:3px}
+  .pick button{width:29px;height:34px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--bean);font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+  .pick button.on{background:var(--bean);border-color:var(--bean);color:#fff;transform:scale(1.06);box-shadow:0 3px 7px rgba(111,92,63,.34)}
+  .pick button:active{transform:scale(.92)}
+  .btns{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+  .btns button{flex:1 1 92px;padding:12px 6px;font-size:12.5px;font-weight:800;border-radius:12px;border:1.5px solid var(--bean);background:#fff;color:var(--bean);font-family:inherit;cursor:pointer;min-width:84px}
+  .btns button.pri{background:var(--bean);border-color:var(--bean);color:#fff}
+  .btns button.gold{border-color:var(--accent);color:var(--accent)}
+  .btns button:active{transform:scale(.97)}
+  .tip{text-align:center;color:var(--sub);font-size:10.5px;margin:9px 0 2px;line-height:1.75}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;background:rgba(255,253,249,.97);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:5px 8px calc(5px + env(safe-area-inset-bottom))}
+  .tabbar button{flex:1;border:none;background:none;font-family:inherit;font-size:9.5px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;padding:2px;font-weight:600}
+  .tabbar button i{font-size:17px;font-style:normal;line-height:1;filter:grayscale(1);opacity:.5}
+  .tabbar button.on{color:var(--bean)}
+  .tabbar button.on i{filter:none;opacity:1}
+  .page{display:none;animation:fade .2s ease}
+  .page.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .toast{position:fixed;left:50%;bottom:82px;transform:translateX(-50%) translateY(16px);z-index:60;background:rgba(58,47,37,.96);color:#fff;font-size:12.5px;font-weight:600;padding:9px 17px;border-radius:20px;opacity:0;pointer-events:none;transition:.26s;max-width:84vw;text-align:center;line-height:1.5}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* 記錄頁 */
+  .rec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px 4px}
+  .rec-head .t{font-size:11.5px;font-weight:800;color:var(--bean);letter-spacing:1.1px}
+  .rec-head .c{font-size:10.5px;color:var(--sub)}
+  .empty{text-align:center;color:var(--faint);font-size:12px;padding:16px 0}
+  table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+  th,td{padding:6px 2px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--sub);font-weight:700;font-size:9px;letter-spacing:.5px;background:var(--paper,#f7f9fb)}
+  td.cupcell{font-weight:800;color:var(--bean);font-size:11.5px;text-align:left;padding-left:6px}
+  td.sc{font-weight:800;font-size:12px}
+  td.del{color:var(--faint);cursor:pointer;font-size:14px;user-select:none}
+  
+  .recbox{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -10px;padding:0 10px}
+  .recbox table{min-width:clamp(480px,92vw,720px)}
+  .eq{background:var(--paper);border-radius:11px;padding:10px 12px;font-size:10.5px;color:var(--sub);line-height:1.8}
+  .eq b{color:var(--bean)}
+  /* ============================================================
+   流體響應式（Fluid RWD）
+   - 以視窗寬度連續縮放，而非只有 3~4 個固定尺寸
+   - 任一寬度下字級 / 按鈕 / 間距都成比例，內容永遠完整不被裁切
+   - 範圍：手機 320px ↔ 桌機 1400px
+   ============================================================ */
+  html{font-size:clamp(14px,calc(14px + 2.2 * ((100vw - 320px)/1080)),20px)}
+  body{padding-bottom:clamp(72px,15vw,88px)}
+
+  /* 抬頭：高度隨寬度平滑增長 */
+  header{padding:clamp(10px,2.6vw,18px) clamp(11px,3vw,24px)}
+  header h1{font-size:clamp(15.5px,3.4vw,25px);letter-spacing:clamp(.4px,.18vw,1.1px)}
+  header h1::before{font-size:clamp(14px,3vw,22px)}
+  header .sub{font-size:clamp(10px,2.2vw,13px);margin-top:clamp(1px,.4vw,3px)}
+  .headrow{margin-top:clamp(6px,1.6vw,12px);gap:clamp(8px,2vw,16px)}
+  .big{font-size:clamp(30px,7.4vw,58px)}
+  .big u{font-size:clamp(11px,2.4vw,16px)}
+  .verd{font-size:clamp(10.5px,2.3vw,14px);padding:clamp(3px,1vw,6px) clamp(8px,2.4vw,14px)}
+  .bar{height:clamp(5px,1.1vw,9px);margin-top:clamp(7px,1.8vw,12px)}
+
+  /* 主體寬度：窄屏貼齊、寬屏置中且留白充足 */
+  .wrap{width:min(92vw,980px);margin:0 auto;padding:clamp(8px,2vw,16px) 0 0}
+
+  /* 卡片 / 列 / 項目名稱 */
+  .card{border-radius:clamp(13px,2.4vw,18px);padding:clamp(2px,1vw,5px) clamp(9px,2.6vw,17px);
+        margin-bottom:clamp(9px,2.2vw,15px)}
+  .sec-t{font-size:clamp(11px,2.3vw,13.5px);padding:clamp(7px,1.6vw,11px) 2px 2px}
+  .row{gap:clamp(7px,2.2vw,14px);padding:clamp(6px,1.4vw,11px) clamp(1px,.6vw,5px)}
+  .name .zh{font-size:clamp(12.5px,2.7vw,16.5px)}
+  .name .en{font-size:clamp(9px,1.9vw,11.5px);margin-top:clamp(1px,.3vw,2px)}
+
+  /* 1–9 數字按鈕：尺寸與字級同步流體縮放，永遠 9 顆完整顯示不換行溢出 */
+  .pick{gap:clamp(2px,.55vw,4px)}
+  .pick button{width:clamp(25px,6.4vw,44px);height:clamp(30px,7.4vw,50px);
+               font-size:clamp(12px,3vw,19px);border-radius:clamp(7px,1.8vw,11px)}
+
+  /* 操作鈕 */
+  .btns{gap:clamp(6px,1.4vw,11px);margin-bottom:clamp(8px,2vw,14px)}
+  .btns button{flex:1 1 clamp(78px,19vw,190px);padding:clamp(10px,2.4vw,15px) clamp(5px,1.2vw,12px);
+               font-size:clamp(11.5px,2.5vw,14.5px);border-radius:clamp(10px,2.4vw,13px);min-width:0}
+
+  .tip{font-size:clamp(10px,2.1vw,12px);margin:clamp(7px,1.8vw,14px) 0 clamp(56px,14vw,72px);line-height:1.7}
+  .eq{font-size:clamp(10px,2.1vw,11.5px);padding:clamp(8px,2vw,12px) clamp(10px,2.4vw,14px);line-height:1.8}
+  .tabbar{padding:clamp(4px,1vw,6px) clamp(6px,1.6vw,10px) calc(clamp(4px,1vw,6px) + env(safe-area-inset-bottom))}
+  .tabbar button{font-size:clamp(9px,1.9vw,11px);gap:0}
+  .tabbar button i{font-size:clamp(15px,3.4vw,19px)}
+  .toast{bottom:clamp(76px,19vw,96px);font-size:clamp(11.5px,2.4vw,13.5px);padding:clamp(8px,1.8vw,10px) clamp(14px,3.4vw,19px)}
+
+  /* 記錄頁 */
+  .rec-head{padding:clamp(4px,1vw,8px) 2px clamp(2px,.6vw,5px);gap:clamp(8px,2vw,14px)}
+  .rec-head .t{font-size:clamp(11px,2.3vw,13px)}
+  .rec-head .c,.empty{font-size:clamp(10.5px,2.1vw,12px)}
+  th,td{padding:clamp(5px,1.1vw,7px) clamp(1px,.5vw,3px);font-size:clamp(9.5px,1.9vw,11.5px)}
+  th{font-size:clamp(8.5px,1.7vw,10px)}
+  td.cupcell{font-size:clamp(11px,2.3vw,12.5px)}
+  td.sc{font-size:clamp(11.5px,2.4vw,13px)}
+  td.del{font-size:clamp(13px,2.6vw,15px)}
+
+  /* 語言選擇器 */
+  .langbox{margin-left:auto}
+  .langbox select{font-family:inherit;font-size:clamp(10.5px,2.1vw,12px);font-weight:700;
+    color:var(--bean);background:rgba(255,255,255,.22);border:1.3px solid rgba(255,255,255,.45);
+    border-radius:clamp(8px,1.8vw,11px);padding:clamp(3px,.8vw,5px) clamp(6px,1.4vw,9px);
+    -webkit-appearance:none;appearance:none;cursor:pointer}
+  .langbox select:focus{outline:none;border-color:#fff;background:rgba(255,255,255,.34)}
+
+  /* ============================================================
+   字級手動縮放（Ａ＋／Ａ－）：作用在 body.fs-zoom 上
+   ============================================================ */
+  body.fs-zoom{font-size:calc(100% * var(--fs-scale))}
+  body.fs-zoom header h1{font-size:calc(clamp(15.5px,3.4vw,25px) * var(--fs-scale))}
+  body.fs-zoom header .sub{font-size:calc(clamp(10px,2.2vw,13px) * var(--fs-scale))}
+  body.fs-zoom .big{font-size:calc(clamp(30px,7.4vw,58px) * var(--fs-scale))}
+  body.fs-zoom .big u{font-size:calc(clamp(11px,2.4vw,16px) * var(--fs-scale))}
+  body.fs-zoom .verd{font-size:calc(clamp(10.5px,2.3vw,14px) * var(--fs-scale))}
+  body.fs-zoom .sec-t{font-size:calc(clamp(11px,2.3vw,13.5px) * var(--fs-scale))}
+  body.fs-zoom .name .zh{font-size:calc(clamp(12.5px,2.7vw,16.5px) * var(--fs-scale))}
+  body.fs-zoom .name .en{font-size:calc(clamp(9px,1.9vw,11.5px) * var(--fs-scale))}
+  body.fs-zoom .pick button{font-size:calc(clamp(12px,3vw,19px) * var(--fs-scale))}
+  body.fs-zoom .btns button{font-size:calc(clamp(11.5px,2.5vw,14.5px) * var(--fs-scale))}
+  body.fs-zoom .tip{font-size:calc(clamp(10px,2.1vw,12px) * var(--fs-scale))}
+  body.fs-zoom .eq{font-size:calc(clamp(10px,2.1vw,11.5px) * var(--fs-scale))}
+  body.fs-zoom .tabbar button{font-size:calc(clamp(9px,1.9vw,11px) * var(--fs-scale))}
+  body.fs-zoom .toast{font-size:calc(clamp(11.5px,2.4vw,13.5px) * var(--fs-scale))}
+  body.fs-zoom .rec-head .t{font-size:calc(clamp(11px,2.3vw,13px) * var(--fs-scale))}
+  body.fs-zoom .rec-head .c,.empty{font-size:calc(clamp(10.5px,2.1vw,12px) * var(--fs-scale))}
+  body.fs-zoom th,body.fs-zoom td{font-size:calc(clamp(9.5px,1.9vw,11.5px) * var(--fs-scale))}
+  body.fs-zoom th{font-size:calc(clamp(8.5px,1.7vw,10px) * var(--fs-scale))}
+  body.fs-zoom td.cupcell{font-size:calc(clamp(11px,2.3vw,12.5px) * var(--fs-scale))}
+  body.fs-zoom td.sc{font-size:calc(clamp(11.5px,2.4vw,13px) * var(--fs-scale))}
+
+  /* Ａ＋／Ａ－ 字級調整鈕 */
+  .fsbox{display:flex;gap:5px;margin-left:auto;align-items:center}
+  .fsbox button{width:clamp(26px,5.4vw,34px);height:clamp(26px,5.4vw,34px);border:1.5px solid rgba(255,255,255,.55);
+    background:rgba(255,255,255,.16);color:#fff;font-family:inherit;font-weight:800;border-radius:9px;
+    font-size:clamp(13px,2.6vw,17px);line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .fsbox button:active{transform:scale(.9);background:rgba(255,255,255,.34)}
+  .fsbox button b{font-weight:800}
+
+  /* ============================================================
+   橫向模式（手機橫過來）：評分項左右雙欄，按鈕放大更好按
+   偵測條件：landscape + 視窗寬高比 > 1.2（典型手機橫向）
+   ============================================================ */
+  @media (orientation:landscape) and (max-height:520px){
+    body{padding-bottom:56px}
+    /* header 壓扁一點 */
+    header{padding:8px 14px}
+    header h1{font-size:clamp(15px,3vw,20px)}
+    .headrow{margin-top:5px}
+    .big{font-size:clamp(28px,6vw,44px)}
+    .bar{margin-top:6px}
+    /* 雙欄：8 項評分切成左右兩欄 */
+    #items{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px}
+    .row{flex-wrap:nowrap;gap:8px;padding:7px 4px}
+    /* 數字按鈕放大 */
+    .pick button{width:clamp(34px,8vw,52px);height:clamp(38px,9vw,56px);font-size:clamp(15px,3.6vw,21px);border-radius:11px}
+    /* 操作鈕一排攤開 */
+    .btns button{flex:1 1 auto;min-width:0;padding:11px 6px;font-size:clamp(11.5px,2.4vw,13.5px)}
+    /* 計算邏輯卡片與 tip 縮小間距 */
+    .tip{margin-bottom:clamp(50px,12vw,64px)}
+    /* 記錄頁表格在手機橫向也讓每列更寬鬆 */
+    .recbox table{min-width:clamp(480px,88vw,900px)}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CVA 咖啡評分器</h1>
+  <div class="sub">8 項情感評分 · 1–9 整數 · 即時換算總分</div>
+  <div class="headrow">
+    <div><div class="big" id="score">0.00<u>分</u></div></div>
+    <div class="verd" id="verdict">尚未評分</div>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="fsbox">
+    <button onclick="fsStep(1)" title="放大字級">Ａ<b style="font-size:0.62em;vertical-align:super">＋</b></button>
+    <button onclick="fsStep(-1)" title="縮小字級">Ａ<b style="font-size:0.62em;vertical-align:sub">－</b></button>
+  </div>
+</header>
+
+<!-- ===== 評分頁 ===== -->
+<div class="page on" id="p-score">
+  <div class="wrap">
+    <div class="card" id="items"></div>
+
+    <div class="card">
+      <div class="sec-t">計算邏輯</div>
+      <div class="eq">
+        <b>各項總和 ≤ 0 時，總分 = 0</b><br>
+        <b>各項總和 &gt; 0 時，總分 = 0.65625 × 各項總和 + 52.75</b><br>
+        結果四捨五入至小數兩位 ｜ 已評 <b id="cnt">0</b> / 8 項
+      </div>
+    </div>
+
+    <div class="btns">
+      <button class="pri" onclick="saveRec()">💾 存一筆記錄</button>
+      <button class="gold" onclick="saveFile()">⬇ 另存新檔</button>
+      <button onclick="shareFile()">📤 分享檔案</button>
+      <button onclick="resetAll()">✕ 清空重評</button>
+      <button onclick="clearEverything()">🗑 全部清零</button>
+    </div>
+    <div class="tip">三種存檔方式並行：自動存本機 + 另存 HTML + 分享。<br>安卓與 iPhone 皆可使用，詳見「記錄」頁說明。</div>
+  </div>
+</div>
+
+<!-- ===== 記錄頁 ===== -->
+<div class="page" id="p-rec">
+  <div class="wrap">
+    <div class="card" style="padding:9px 10px">
+      <div class="rec-head"><div class="t">評分記錄</div><div class="c" id="reccnt">0 筆</div></div>
+      <div class="btns" style="margin:8px 0 0">
+        <button class="pri" onclick="exportCSV()">⬇ 匯出 CSV</button>
+        <button onclick="go('score')">＋ 新增評分</button>
+      </div>
+      <div class="recbox">
+        <div id="recempty" class="empty">尚無記錄<br><span style="font-size:10px">完成 8 項評分並儲存後，會顯示在此處</span></div>
+        <table id="rectbl" style="display:none">
+          <thead><tr><th style="text-align:left;padding-left:6px">編號 / 時間</th><th>總分</th><th>1<br>乾</th><th>2<br>濕</th><th>3<br>風</th><th>4<br>厚</th><th>5<br>韻</th><th>6<br>酸</th><th>7<br>甜</th><th>8<br>整</th><th></th></tr></thead>
+          <tbody id="rectb"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-t">另存新檔 · 跨平台說明</div>
+      <div class="eq" style="font-size:10px;line-height:1.85">
+        <b>① 自動存本機</b>：每次評分即時寫入瀏覽器本地空間，關閉網頁、重開手機都不會消失；同一杯豆可反覆修改。<br>
+        <b>② 另存新檔（HTML）</b>：把目前的記錄打包成一個獨立網頁。iPhone 用 Safari 下載後存到「檔案」App；安卓用 Chrome 下載後存到「下載」或「檔案」App，之後可用瀏覽器打開繼續編輯。<br>
+        <b>③ 分享檔案</b>：iPhone 支援「分享」可直接傳到 LINE / 郵件 / AirDrop；安卓若無反應會自動改為下載。<br>
+        <b>④ 匯出 CSV</b>：用 Excel 打開可橫向對照多杯豆的細分分數（檔案含 BOM，中文不亂碼）。<br>
+        ⚠ 清除瀏覽器資料會刪除本機記錄，重要資料請務必「另存新檔」或「匯出 CSV」備份。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tabbar">
+  <button id="t-score" class="on" onclick="go('score')"><i>◎</i>評分</button>
+  <button id="t-rec" onclick="go('rec')"><i>☰</i>記錄</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   字級手動縮放（Ａ＋／Ａ－）：5 級，0.85 / 1.00 / 1.15 / 1.30 / 1.45
+   設定存到 localStorage，下次開啟自動套用
+   ============================================================ */
+(function applyFontSize(){
+  const SCALES=[0.85,1,1.15,1.3,1.45];
+  let idx=1;
+  try{const s=parseInt(localStorage.getItem("cva_fs_idx"),10);if(!isNaN(s)&&s>=0&&s<SCALES.length)idx=s}catch(e){}
+  document.documentElement.style.setProperty('--fs-scale',SCALES[idx]);
+  document.body.classList.add('fs-zoom');
+  /* 把 idx 暴露給 fsStep 使用 */
+  window.__fsIdx=idx;window.__fsScales=SCALES;
+})();
+function fsStep(dir){
+  const SCALES=window.__fsScales, cur=window.__fsIdx;
+  const next=Math.max(0,Math.min(SCALES.length-1,cur+dir));
+  if(next===cur)return;
+  window.__fsIdx=next;
+  try{localStorage.setItem("cva_fs_idx",next)}catch(e){}
+  document.documentElement.style.setProperty('--fs-scale',SCALES[next]);
+  document.body.classList.add('fs-zoom');
+  toast(next>1?"字級已放大":(next<1?"字級已縮小":"字級已還原"));
+}
+
+/* ===== 一鍵全部清零：連同歷史記錄一起清除（危險操作，二次確認） ===== */
+function clearEverything(){
+  if(!confirm("⚠️ 確定要「全部清零」嗎？\n\n這會清除【所有已存記錄】以及本頁評分，且無法復原。\n\n只清本頁請點「✕ 清空重評」。"))return;
+  /* 再二次確認，避免誤觸 */
+  if(!confirm("最後確認：真的要刪除全部 " + records.length + " 筆記錄嗎？"))return;
+  records=[];STATE.fill("");
+  document.querySelectorAll('.pick button').forEach(b=>b.classList.remove('on'));
+  try{localStorage.removeItem(KEY)}catch(e){}
+  autosave();renderRec();calc();
+  toast("已全部清零");
+}
+
+/* ===== 系統語言自動偵測：macOS / Windows / iOS / Android 皆適用 ===== */
+(function detectLang(){
+  let pick="zh";
+  const nav=window.navigator||{};
+  const tags=[];
+  if(nav.language)tags.push(nav.language);
+  if(nav.languages&&nav.languages.length)Array.prototype.push.apply(tags,nav.languages);
+  if(nav.userLanguage)tags.push(nav.userLanguage);
+  if(nav.browserLanguage)tags.push(nav.browserLanguage);
+  if(nav.systemLanguage)tags.push(nav.systemLanguage);
+  const ua=(nav.userAgent||"").toLowerCase();
+  const prefer=tags.join(",").toLowerCase();
+  /* 簡體中文地區優先判定 */
+  const zhCN=/zh-(cn|hans|sg|my)|zh@cn|\bzhcn\b/;
+  const explicit=/zh-(hk|tw|mo|hant)|zh@tw|\bzhtw\b|\bzhhk\b/;
+  if(zhCN.test(prefer)||/\bzh-cn\b/.test(ua))pick="zhCN";
+  else if(explicit.test(prefer))pick="zh";
+  else if(/^zh/.test(prefer))pick="zh";
+  else if(/^en/.test(prefer))pick="en";
+  else if(/^(ja|ko|es|fr|de|it|pt|ru)/.test(prefer)){
+    pick="en"; /* 暫以英文兜底，避免半翻譯 */
+  }
+  /* 若使用者曾手動選過語言，以手動為準 */
+  try{const saved=localStorage.getItem("cva_lang");if(saved==="zh"||saved==="zhCN"||saved==="en")pick=saved}catch(e){}
+  document.documentElement.setAttribute("data-lang",pick);
+  const sel=document.getElementById('langsel');
+  if(sel){sel.value=pick;sel.onchange=e=>setLang(e.target.value)}
+})();
+
+/* ============ 8 項評分定義（上一筆 CVA 計算器） ============ */
+const ITEMS=[
+  ["乾香","Dry Aroma"],["濕香","Wet Aroma"],["風味","Flavor"],["純厚度","Body"],
+  ["餘韻","Aftertaste"],["酸表現","Acidity"],["甜感","Sweetness"],["綜合評估","Overall"]
+];
+const KEY="cva_scores_v2";
+let records=[];
+try{records=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){records=[]}
+const STATE=ITEMS.map(()=>"");
+
+(function build(){
+  const box=document.getElementById('items');
+  ITEMS.forEach((it,i)=>{
+    let btns="";
+    for(let n=1;n<=9;n++)btns+=`<button id="b${i}_${n}" onclick="pick(${i},${n})">${n}</button>`;
+    const row=document.createElement('div');row.className='row';
+    row.innerHTML=`<div class="name"><div class="zh">${it[0]}</div><div class="en">${it[1]}</div></div>
+      <div class="scroller"><div class="pick">${btns}</div></div>`;
+    box.appendChild(row);
+  });
+})();
+
+/* ============ 計算（上上筆：1–9 整數；上一筆：0.65625×sum+52.75） ============ */
+function scores(){return STATE.map(v=>{const n=parseInt(v,10);return(isNaN(n)||n<1||n>9)?0:n})}
+function calc(){
+  const sc=scores();
+  const sum=sc.reduce((a,b)=>a+b,0);
+  const total=sum>0?Math.round((0.65625*sum+52.75)*100)/100:0;
+  document.getElementById('score').innerHTML=total.toFixed(2)+'<u>分</u>';
+  document.getElementById('cnt').textContent=sc.filter(x=>x>0).length;
+  document.getElementById('bar').style.width=Math.min(100,total)+'%';
+  const v=document.getElementById('verdict');
+  if(!sum)v.textContent="尚未評分";
+  else if(total>=90)v.textContent="卓越 Exceptional";
+  else if(total>=85)v.textContent="優秀 Outstanding";
+  else if(total>=80)v.textContent="良好 Very Good";
+  else if(total>=75)v.textContent="尚可 Good";
+  else v.textContent="待加強 Fair";
+  return{sc,sum,total};
+}
+function pick(i,v){
+  STATE[i]=STATE[i]===v?"":v;
+  for(let n=1;n<=9;n++)document.getElementById(`b${i}_${n}`).classList.toggle('on',STATE[i]==n);
+  calc();
+}
+/* 輸入即時自動存本機 */
+function autosave(){localStorage.setItem(KEY,JSON.stringify(records))}
+
+/* ============ 存檔 / 重設 ============ */
+function resetAll(){
+  if(!confirm("確定清空本次 8 項評分？已存的記錄不受影響。"))return;
+  STATE.fill("");
+  document.querySelectorAll('.pick button').forEach(b=>b.classList.remove('on'));
+  calc();toast("已清空，可重新評分");
+}
+function saveRec(){
+  const{sc,sum,total}=calc();
+  if(!sum){toast("請先完成至少一項評分");return}
+  const cup="CVA #"+(records.length+1)+" · "+new Date().toLocaleDateString('zh-Hant');
+  const rec={id:Date.now(),cup,sc:sc.slice(),sum,total,date:new Date().toLocaleString('zh-Hant',{hour12:false})};
+  records.unshift(rec);autosave();renderRec();
+  toast("已存第 "+records.length+" 筆 · "+total.toFixed(2)+" 分");
+  setTimeout(()=>go('rec'),550);
+}
+function delRec(id,e){e.stopPropagation();records=records.filter(r=>r.id!==id);autosave();renderRec()}
+function loadRec(id){
+  const r=records.find(x=>x.id===id);if(!r)return;
+  r.sc.forEach((v,i)=>pick(i,v));go('score');toast("已載入："+r.cup);
+}
+function renderRec(){
+  const empty=document.getElementById('recempty'),tbl=document.getElementById('rectbl'),tb=document.getElementById('rectb');
+  document.getElementById('reccnt').textContent=records.length+" 筆";
+  if(!records.length){empty.style.display='block';tbl.style.display='none';return}
+  empty.style.display='none';tbl.style.display='table';
+  tb.innerHTML=records.map(r=>{
+    const tag=r.total>=85?'style="color:#2f7a4d"':(r.total<75?'style="color:#c8602a"':'');
+    return `<tr onclick="loadRec(${r.id})"><td class="cupcell">${r.cup}<div style="font-size:9.5px;font-weight:400;color:var(--faint)">${r.date}</div></td>
+      <td class="sc" ${tag}>${r.total.toFixed(2)}</td>${r.sc.map(x=>`<td>${x||"—"}</td>`).join('')}
+      <td class="del" onclick="delRec(${r.id},event)">✕</td></tr>`;
+  }).join('');
+}
+
+/* ============ 另存新檔：產生獨立 HTML（安卓 / iPhone 都能打開） ============ */
+function saveFile(){
+  if(!records.length){toast("尚無記錄，請先評分並存檔");return}
+  const blob=new Blob(['\ufeff'+buildStandalone(records)],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download="CVA咖啡評分記錄_"+new Date().toISOString().slice(0,10)+".html";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+  toast("已另存為獨立網頁，可用瀏覽器打開");
+}
+/* 分享（iPhone 原生分享；安卓不支援則改下載） */
+function shareFile(){
+  if(!records.length){toast("尚無記錄");return}
+  const file=new File(['\ufeff'+buildStandalone(records)],"CVA咖啡評分記錄.html",{type:'text/html'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:"CVA 咖啡評分記錄"}).catch(()=>{});
+  }else{
+    toast("本機不支援分享，已改為下載");
+    saveFile();
+  }
+}
+/* 產生一份「自包含」的唯讀記錄表（含本檔全部 CSS，可離線打開） */
+function buildStandalone(recs){
+  const rows=recs.map(r=>`<tr><td style="text-align:left;padding-left:8px">${esc(r.cup)}<div style="font-size:9px;color:#9aa6b2;font-weight:400">${r.date}</div></td>
+    <td><b>${r.total.toFixed(2)}</b></td>${r.sc.map(x=>`<td>${x||"—"}</td>`).join('')}<td>${r.sum}</td></tr>`).join('');
+  return `<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CVA 咖啡評分記錄</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans CJK TC","Noto Sans CJK SC",system-ui,sans-serif;background:#eef1f5;color:#16202c;padding:14px}
+h1{font-size:19px;color:#1f3a5f;display:flex;align-items:center;gap:7px}
+h1::before{content:"☕"} .sub{font-size:11px;color:#6b7785;margin:4px 0 12px}
+.card{background:#fff;border:1px solid #e2e7ed;border-radius:14px;padding:5px 11px;margin-bottom:11px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:7px 4px;text-align:center;border-bottom:1px solid #e2e7ed;white-space:nowrap}
+th{background:#1f3a5f;color:#fff;font-size:9px;letter-spacing:.5px}
+td:first-child{text-align:left;font-weight:700;color:#1f3a5f;font-size:11.5px}
+.note{font-size:10.5px;color:#6b7785;line-height:1.8;background:#f7f9fb;border-radius:11px;padding:10px 12px}
+</style></head><body>
+<h1>CVA 咖啡評分記錄</h1><div class="sub">共 ${recs.length} 筆 · 公式：0.65625 × 各項總和 + 52.75</div>
+<div class="card"><table>
+<thead><tr><th style="text-align:left;padding-left:8px">編號 / 時間</th><th>總分</th><th>1 乾香</th><th>2 濕香</th><th>3 風味</th><th>4 厚度</th><th>5 餘韻</th><th>6 酸質</th><th>7 甜感</th><th>8 綜合</th><th>總和</th></tr></thead>
+<tbody>${rows}</tbody></table></div>
+<div class="note">本檔由「CVA 咖啡評分器」另存產生，可離線用瀏覽器開啟。iPhone 存於「檔案」App，安卓存於「下載」App。</div>
+</body></html>`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+/* ============ 匯出 CSV（Excel 中文不亂碼） ============ */
+function exportCSV(){
+  if(!records.length){toast("尚無記錄可匯出");return}
+  const head=["杯測編號","評分時間","總分","各項總和",...ITEMS.map(i=>i[0]+" "+i[1])];
+  const rows=records.map(r=>[r.cup,r.date,r.total.toFixed(2),r.sum,...r.sc]);
+  const csv="\ufeff"+[head,...rows].map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download="CVA咖啡評分記錄.csv";document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast("已匯出 "+records.length+" 筆記錄");
+}
+
+/* ============ 分頁 ============ */
+function go(p){
+  document.querySelectorAll('.page').forEach(e=>e.classList.toggle('on',e.id==='p-'+p));
+  ['score','rec'].forEach(k=>document.getElementById('t-'+k).classList.toggle('on',k===p));
+  if(p==='rec')renderRec();window.scrollTo(0,0);
+}
+let toastTimer;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('on'),1700)}
+
+calc();renderRec();
+</script>
+</body>
+</html>
