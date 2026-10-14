@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#6f5c3f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CVA 综合评估</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  :root{--bg:#f4efe6;--card:#fffdf9;--ink:#3a2f25;--sub:#8a7a67;--faint:#c9bba8;--line:#e2d8c6;--paper:#f7f3ec;
+  --bean:#6f5c3f;--bean-l:#9a8463;--accent:#c8602a;--gold:#c09a5a;--ok:#3f7a4f;
+  /* 字级手动缩放系数（Ａ＋／Ａ－ 控制，存 localStorage） */
+  --fs-scale:1}
+  html,body{height:100%}
+  body{font-family:"Noto Sans CJK TC","Noto Sans CJK SC",system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:calc(76px + 56px)}
+  header{background:linear-gradient(135deg,#6f5c3f,#9a8463);color:#fff;padding:12px 13px;box-shadow:0 3px 14px rgba(111,92,63,.28)}
+  .headtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  header h1{font-size:17.5px;font-weight:800;letter-spacing:.7px;display:flex;align-items:center;gap:7px}
+  header .ver{font-size:9.5px;font-weight:700;color:rgba(255,255,255,.85);
+    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+    border-radius:7px;padding:2px 6px;margin-left:5px;letter-spacing:.5px;white-space:nowrap;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  header h1::before{content:"☕";font-size:16px}
+  header .sub{font-size:10.5px;opacity:.85;margin-top:2px}
+  .headrow{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:9px}
+  .big{font-size:36px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .big u{text-decoration:none;font-size:13.5px;font-weight:600;opacity:.85;margin-left:2px}
+  .verd{font-size:11.5px;font-weight:700;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:20px;white-space:nowrap;text-align:center;line-height:1.35}
+  .setbtn{font-family:inherit;font-size:10.5px;font-weight:800;color:#fff;
+    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:9px;padding:5px 9px;cursor:pointer;line-height:1;flex:none}
+  .setbtn:active{background:rgba(255,255,255,.35)}
+  /* 顶部资讯列：日期 + 填表人，固定在标题旁 */
+  .topbar{display:flex;align-items:stretch;gap:8px;margin-top:9px;flex-wrap:wrap}
+  .topbar .ti{flex:1 1 130px;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .topbar .ti label{font-size:9.5px;font-weight:700;color:rgba(255,255,255,.82);letter-spacing:.6px;display:flex;align-items:center;gap:4px}
+  .topbar .ti label i{font-style:normal;font-size:9px;font-weight:600;color:rgba(255,255,255,.6)}
+  .topbar .ti input{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);
+    background:rgba(255,255,255,.95);border:1.3px solid rgba(255,255,255,.5);border-radius:9px;
+    padding:7px 9px;width:100%;box-sizing:border-box}
+  .topbar .ti input::placeholder{color:#b9ad9c;font-weight:400}
+  .topbar .ti input:focus{outline:none;border-color:#fff;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.22)}
+  @media (max-width:430px){.topbar .ti{flex:1 1 100%}}
+  .bar{height:6px;border-radius:6px;background:rgba(255,255,255,.3);margin-top:9px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:#e9cf9f;border-radius:6px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+  .wrap{padding:10px 10px 0;max-width:920px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:3px 10px;margin-bottom:10px;box-shadow:0 2px 10px rgba(111,92,63,.06)}
+  .sec-t{font-size:11.5px;font-weight:800;color:var(--bean);letter-spacing:1.1px;padding:9px 2px 2px;display:flex;align-items:center;gap:6px}
+  .sec-t::before{content:"";width:4px;height:13px;border-radius:2px;background:var(--gold)}
+  .row{display:flex;align-items:center;gap:9px;padding:8px 3px;border-bottom:1px dashed var(--line)}
+  .row:last-child{border-bottom:none}
+  .name{flex:1 1 auto;min-width:0}.name .zh{font-size:13.5px;font-weight:700;color:var(--bean)}
+  .name .en{font-size:9.5px;color:var(--sub);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .scroller{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -1px;padding:1px 0}
+  .scroller::-webkit-scrollbar{display:none}
+  .pick{display:flex;gap:3px}
+  .pick button{width:29px;height:34px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--bean);font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+  .pick button.on{background:var(--bean);border-color:var(--bean);color:#fff;transform:scale(1.06);box-shadow:0 3px 7px rgba(111,92,63,.34)}
+  .pick button:active{transform:scale(.92)}
+  .btns{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+  .btns button{flex:1 1 92px;padding:12px 6px;font-size:12.5px;font-weight:800;border-radius:12px;border:1.5px solid var(--bean);background:#fff;color:var(--bean);font-family:inherit;cursor:pointer;min-width:84px}
+  .btns button.pri{background:var(--bean);border-color:var(--bean);color:#fff}
+  .btns button.gold{border-color:var(--accent);color:var(--accent)}
+  .btns button:active{transform:scale(.97)}
+  .tip{text-align:center;color:var(--sub);font-size:10.5px;margin:9px 0 2px;line-height:1.75}
+  /* 计算逻辑卡片：说明 → 分隔线 → 计算逻辑 → 分隔线 → 版权宣告
+     紧贴上方按钮列，下方另由 #bottomSpacer 提供留白 */
+  #logicCard{padding:14px 10px 10px;margin-bottom:10px}
+  #logicCard .explain{padding-top:4px}
+  #logicCard .cr{padding:8px 2px 2px}
+  /* 卡片下方的空白卡片：高度约为 logicCard 的一半 */
+
+  /* 空白卡片：高度约为 logicCard 的一半，作为页面底部留白
+     整片改为浅色虚线框，语意与其余卡片一致；对辅助技术隐藏内容 */
+  #bottomSpacer{height:60px;border:1.5px dashed var(--line);background:transparent;
+    box-shadow:none;display:flex;align-items:center;justify-content:center}
+  #bottomSpacer .v{font-size:10px;font-weight:700;color:var(--faint);letter-spacing:1.4px}
+  .visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+    overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+
+  #spacerCard{min-height:clamp(74px,15vw,110px);border-style:dashed;background:transparent;box-shadow:none}
+  @media (max-width:820px){#spacerCard{min-height:60px}}
+  .explain{font-size:10.5px;line-height:1.8;color:var(--sub);padding:2px 2px 0}
+  .logic-rule{border-top:1px dashed var(--line);margin:8px 0}
+  .cr{font-size:9.5px;font-weight:600;letter-spacing:.3px;color:var(--bean);
+    text-align:center;line-height:1.7;padding:0 2px}
+  .tabbar{position:sticky;left:0;right:0;bottom:0;z-index:40;
+    display:flex;flex-direction:column;align-items:stretch;
+    background:rgba(255,253,249,.97);backdrop-filter:blur(10px);border-top:1px solid var(--line);
+    padding:0 0 0}
+  .tabbar__btns{display:flex;padding:5px 8px 4px}
+  .tabbar__btns button{flex:1;border:none;background:none;font-family:inherit;font-size:9.5px;color:var(--sub);
+    display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;padding:2px;font-weight:600}
+  .tabbar__btns button i{font-size:17px;font-style:normal;line-height:1;filter:grayscale(1);opacity:.5}
+  .tabbar__btns button.on{color:var(--bean)}
+  .tabbar__btns button.on i{filter:none;opacity:1}
+  .tabbar__cr{font-size:9px;font-weight:600;letter-spacing:.3px;color:#8a7557;
+    text-align:right;line-height:1.4;padding:0 10px 5px}
+  .page{display:none;animation:fade .2s ease}
+  .page.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .toast{position:fixed;left:50%;bottom:82px;transform:translateX(-50%) translateY(16px);z-index:60;background:rgba(58,47,37,.96);color:#fff;font-size:12.5px;font-weight:600;padding:9px 17px;border-radius:20px;opacity:0;pointer-events:none;transition:.26s;max-width:84vw;text-align:center;line-height:1.5}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* ============================================================
+     多样品管理：左侧固定样品列 + 设定对话框
+     ============================================================ */
+  body.with-list{padding-left:58px}
+  .slist{position:fixed;top:0;left:0;bottom:0;width:58px;z-index:50;
+    background:linear-gradient(180deg,#6f5c3f,#8d7553);
+    padding:48px 0 12px;display:flex;flex-direction:column;align-items:center;gap:7px;
+    overflow-y:auto;scrollbar-width:none}
+  .slist::-webkit-scrollbar{display:none}
+  .slist .lbl{font-size:8.5px;font-weight:800;color:rgba(255,255,255,.72);letter-spacing:1.2px;
+    writing-mode:vertical-rl;text-orientation:mixed;margin-bottom:2px}
+  .sbtn{width:44px;height:44px;border:none;border-radius:12px;cursor:pointer;flex:none;
+    font-family:inherit;font-size:11px;font-weight:800;line-height:1.1;color:#6f5c3f;
+    background:rgba(255,255,255,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.18);transition:.15s;padding:3px 2px 2px}
+  .sbtn>b{font-size:12.5px;font-weight:800;line-height:1;color:inherit;display:block}
+  .sbtn>span{font-size:7.5px;font-weight:600;color:#9a8463;margin-top:1px;line-height:1.15;display:block;max-width:38px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sbtn:hover{transform:scale(1.06)}
+  .sbtn.cur{background:var(--gold);color:#fff;box-shadow:0 4px 12px rgba(192,154,90,.55);transform:scale(1.08)}
+  .sbtn.cur>span{color:rgba(255,255,255,.92)}
+  .sbtn.done{background:#e9cf9f}
+  .sbtn.done>span{color:#6f5c3f}
+  .sbtn.add{background:rgba(255,255,255,.16);color:#fff;font-size:19px;line-height:1}
+  .sbtn.set{background:rgba(255,255,255,.16);color:#fff;font-size:9.5px;font-weight:800;margin-top:auto}
+  .sbtn.set small{display:none}
+  .scur{position:fixed;left:0;bottom:0;width:58px;z-index:51;text-align:center;
+    font-size:8.5px;font-weight:800;color:rgba(255,255,255,.85);background:rgba(0,0,0,.14);
+    padding:5px 0 6px;letter-spacing:.6px}
+  .mask{position:fixed;inset:0;background:rgba(40,30,20,.55);z-index:70;display:none;align-items:center;justify-content:center;padding:16px}
+  .mask.on{display:flex}
+  .dlg{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 15px;
+    width:100%;max-width:330px;box-shadow:0 12px 34px rgba(0,0,0,.3)}
+  .dlg h3{font-size:14.5px;color:var(--bean);font-weight:800;margin-bottom:3px}
+  .dlg .ds{font-size:10px;color:var(--sub);line-height:1.6;margin-bottom:12px}
+  .dlg label.t{font-size:10.5px;font-weight:800;color:var(--bean);letter-spacing:.5px}
+  .dlg input[type=number]{font-family:inherit;font-size:16px;font-weight:800;color:var(--ink);
+    width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:11px;background:var(--paper);
+    margin:6px 0 4px;box-sizing:border-box}
+  .dlg input:focus{outline:none;border-color:var(--gold)}
+  .dlg .hint{font-size:9.5px;color:var(--faint);margin-bottom:14px}
+  .dlg .err{font-size:10px;color:var(--accent);font-weight:700;margin:6px 0 10px;display:none}
+  .dlg .acts{display:flex;gap:8px}
+  .dlg .acts button{flex:1;padding:11px 6px;border-radius:11px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;border:1.5px solid var(--bean)}
+  .dlg .acts .ok{background:var(--bean);color:#fff}
+  .dlg .acts .no{background:#fff;color:var(--bean)}
+  @media (max-width:820px){body.with-list{padding-left:0;padding-bottom:calc(132px + 56px)}
+    .tabbar{z-index:45}
+    .slist{top:auto;left:0;right:0;bottom:0;width:auto;height:56px;z-index:50;flex-direction:row;
+      padding:8px 8px calc(8px + env(safe-area-inset-bottom));overflow-x:auto;overflow-y:hidden;
+      background:linear-gradient(90deg,#6f5c3f,#8d7553)}
+    .slist .lbl{display:none}
+    .tabbar{bottom:0}
+    .sbtn{width:42px;height:40px;flex:none}
+    .sbtn>span{font-size:7px}
+    .scur{display:none}
+    .sbtn.set,.sbtn.add{height:40px}
+  }
+
+
+  /* ============================================================
+   CVA 描述性评估（SCA 咖啡价值评估 2024 第二版）
+   - 每个区段一条 0–15 强度滑杆（input[type=range]）+ 数值显示
+   - 滑杆可横向拖曳微调；点击数值可切换 1 的步距
+   - 香气 / 风味属性用 CATA 勾选框，可依附件表格独立勾选
+   ============================================================ */
+  .desc-card{margin-top:10px}
+  .desc-card .sec-t{justify-content:space-between;gap:8px}
+  .desc-card .sec-t .hint{font-size:9.5px;font-weight:600;color:var(--bean-l);letter-spacing:0;white-space:nowrap}
+  .dsec{margin:0 -3px;padding:11px 3px;border-bottom:1px dashed var(--line)}
+  .dsec:last-child{border-bottom:none}
+  .dsec .dt{display:flex;align-items:baseline;gap:6px;margin-bottom:7px;flex-wrap:wrap}
+  .dsec .dt .zh{font-size:12.5px;font-weight:800;color:var(--bean)}
+  .dsec .dt .en{font-size:9px;color:var(--sub);letter-spacing:.2px}
+  /* 强度滑杆：0–15 共 16 阶，可拖曳 */
+  .int{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .int label.int-lb{flex:1 1 auto;min-width:0;font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.6px}
+  .int .rail{position:relative;flex:1 1 auto;min-width:0;padding:3px 0;margin-right:2px}
+  .int .rail::after{content:"";position:absolute;left:0;right:0;top:50%;height:7px;transform:translateY(-50%);
+      background:repeating-linear-gradient(90deg,var(--faint) 0 1px,transparent 1px calc(100%/15));
+      border-radius:7px;pointer-events:none;opacity:.45}
+  .int input[type=range]{position:relative;z-index:2}
+  .int input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;margin:0;background:transparent;cursor:pointer}
+  .int input[type=range]:focus{outline:none}
+  .int input[type=range]::-webkit-slider-runnable-track{height:7px;border-radius:7px;background:var(--faint)}
+  .int input[type=range]::-moz-range-track{height:7px;border-radius:7px;background:var(--faint)}
+  .int .rail::before{content:"";position:absolute;left:0;top:50%;height:7px;transform:translateY(-50%);
+      width:var(--fill,0%);background:linear-gradient(90deg,var(--bean),var(--bean-l));
+      border-radius:7px;pointer-events:none;z-index:1;transition:width .12s linear}
+  .int input[type=range]::-moz-range-track{height:7px;border-radius:7px;background:var(--faint)}
+  .int input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;
+      background:#fff;border:2.5px solid var(--bean);margin-top:-6px;box-shadow:0 2px 5px rgba(111,92,63,.3);
+      transition:transform .12s}
+  .int input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:#fff;
+      border:2.5px solid var(--bean);box-shadow:0 2px 5px rgba(111,92,63,.3)}
+  .int input[type=range]:active::-webkit-slider-thumb{transform:scale(1.18)}
+  .int .val{width:42px;height:26px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);
+      color:var(--bean);font-size:12.5px;font-weight:800;font-family:inherit;text-align:center;line-height:24px;
+      cursor:pointer;flex:none;font-variant-numeric:tabular-nums}
+  .int .val.zero{color:var(--faint)}
+  /* 低 / 中 / 高 三段标记 */
+  .int ticks{display:flex;justify-content:space-between;font-size:8px;color:var(--faint);
+      letter-spacing:.4px;margin:-4px 0 6px;padding:0 calc(21px + 9px)}
+  /* CATA 勾选网格：3 列，贴合附件表格栏位密度 */
+  .cata{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px}
+  .cata.s2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cata label{display:flex;align-items:center;gap:4px;font-size:9.6px;color:var(--ink);line-height:1.25;
+      cursor:pointer;padding:2px 1px;min-height:0}
+  .cata label input{width:12px;height:12px;accent-color:var(--bean);flex:none;margin:0;cursor:pointer}
+  .cata.mf{grid-template-columns:1fr}
+  .cata.mf label{font-size:10px;padding:3px 1px}
+  /* ===== 综合评估区块化版面 ===== */
+  .eval-card{margin-top:10px}
+  .eval{margin:0 -3px 14px;padding:12px 9px 4px;border:1px solid var(--line);border-left:4px solid var(--bean);
+         border-radius:13px;background:linear-gradient(180deg,#fffdf9,#fbf8f2);box-shadow:0 2px 9px rgba(111,92,63,.07)}
+  .eval .big-t{font-size:clamp(13px,2.8vw,16px);color:var(--bean);letter-spacing:.6px;padding:0 2px 8px;
+               border-bottom:2px solid var(--gold);margin-bottom:9px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .eval .big-t .en2{font-size:9px;font-weight:600;color:var(--bean-l);letter-spacing:.2px}
+
+  /* 顶部样品资讯表单 */
+  .meta{margin-top:9px;display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+  .meta .mi{display:flex;flex-direction:column;gap:3px}
+  .meta .mi.full{grid-column:1/-1}
+  .meta .mi label{font-size:9.5px;font-weight:700;color:rgba(255,255,255,.82);letter-spacing:.6px}
+  .meta .mi input{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);
+    background:rgba(255,255,255,.95);border:1.3px solid rgba(255,255,255,.5);border-radius:9px;
+    padding:7px 9px;width:100%;box-sizing:border-box}
+  .meta .mi input::placeholder{color:#b9ad9c;font-weight:400}
+  .meta .mi input:focus{outline:none;border-color:#fff;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.22)}
+  /* 烘焙程度滑杆：6 档位，左浅右深，不显示数值 */
+  .roast{margin-top:2px}
+  .roast-pick{display:flex;gap:5px}
+  .roast-pick label{flex:1;position:relative}
+  .roast-pick input{position:absolute;opacity:0;width:0;height:0}
+  .roast-pick span{display:block;text-align:center;font-size:10px;font-weight:700;color:rgba(255,255,255,.82);
+    padding:9px 2px 8px;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;
+    background:rgba(255,255,255,.07);cursor:pointer;line-height:1.35;transition:.15s;white-space:nowrap}
+  .roast-pick span small{display:block;font-size:7.6px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.3px;margin-top:2px}
+  .roast-pick input:checked + span{background:#e9cf9f;color:#5c4a30;border-color:#e9cf9f;
+    box-shadow:0 3px 9px rgba(0,0,0,.28);transform:translateY(-1px)}
+  .roast-pick input:focus-visible + span{outline:2px solid #fff;outline-offset:2px}
+  .roast-now{text-align:center;font-size:10.5px;font-weight:800;color:#fff;margin-top:8px;letter-spacing:.5px}
+  .roast-now b{color:#e9cf9f}
+  /* 情感性评分：配对区块改为上下排列（干/湿、风味/余韵） */
+  .eval .emogrid.stack{grid-template-columns:1fr}
+  .eval .subsec{margin-bottom:11px}
+  .eval .sub-t{font-size:10.5px;color:var(--bean-l);letter-spacing:.9px;padding:0 0 6px}
+  .eval .sub-t::before{background:var(--bean-l)}
+  .eval .dsec{padding:9px 2px}
+  .eval .emogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px 14px}
+  .eval .emo{display:flex;align-items:center;gap:9px;padding:6px 3px;border-bottom:1px dashed var(--line)}
+  .eval .emo:last-child{border-bottom:none}
+  .eval .emo .zh{font-size:12.5px}
+  .eval .emo .en{font-size:9px}  .cata.mf label .sub2{color:var(--sub);font-size:8.6px;margin-left:2px;font-weight:400}
+  /* 配对共用栏位：位于两条强度条之后，视觉上与强度条区隔 */
+  .dsec.pair{background:linear-gradient(180deg,#fbf7f0,#f6f1e8);border:1px solid var(--gold);border-left:4px solid var(--gold);
+             border-radius:12px;padding:11px 12px;margin:6px -3px 10px;box-shadow:0 2px 8px rgba(192,154,90,.14)}
+  .dsec.pair .dt{margin-bottom:8px}
+  .dsec.pair .dt .zh{font-size:11.8px}
+  .dsec.pair .dt .en{font-size:8.6px}
+  .dsec.pair .cata{margin-top:2px}
+  .dsec.pair .taste-block{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+  .dsec.pair .taste-t{font-size:8.6px;font-weight:800;color:var(--bean-l);letter-spacing:.8px;margin-bottom:3px}
+  /* 记录页 */
+  .rec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px 4px}
+  .rec-head .t{font-size:11.5px;font-weight:800;color:var(--bean);letter-spacing:1.1px}
+  .rec-head .c{font-size:10.5px;color:var(--sub)}
+  .empty{text-align:center;color:var(--faint);font-size:12px;padding:16px 0}
+  table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+  th,td{padding:6px 2px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--sub);font-weight:700;font-size:9px;letter-spacing:.5px;background:var(--paper,#f7f9fb)}
+  td.cupcell{font-weight:800;color:var(--bean);font-size:11.5px;text-align:left;padding-left:6px}
+  td.sc{font-weight:800;font-size:12px}
+  td.del{color:var(--faint);cursor:pointer;font-size:14px;user-select:none}
+  
+  .recbox{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -10px;padding:0 10px}
+  .recbox table{min-width:clamp(900px,150vw,1400px)}
+  .eq{background:var(--paper);border-radius:11px;padding:10px 12px;font-size:10.5px;color:var(--sub);line-height:1.8}
+  .eq b{color:var(--bean)}
+  /* ============================================================
+   流体响应式（Fluid RWD）
+   - 以视窗宽度连续缩放，而非只有 3~4 个固定尺寸
+   - 任一宽度下字级 / 按钮 / 间距都成比例，内容永远完整不被裁切
+   - 范围：手机 320px ↔ 桌机 1400px
+   ============================================================ */
+  html{font-size:clamp(14px,calc(14px + 2.2 * ((100vw - 320px)/1080)),20px)}
+  body{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+
+  /* 抬头：高度随宽度平滑增长 */
+  header{padding:clamp(10px,2.6vw,18px) clamp(11px,3vw,24px)}
+  header h1{font-size:clamp(15.5px,3.4vw,25px);letter-spacing:clamp(.4px,.18vw,1.1px)}
+  header h1::before{font-size:clamp(14px,3vw,22px)}
+  header .sub{font-size:clamp(10px,2.2vw,13px);margin-top:clamp(1px,.4vw,3px)}
+  .headrow{margin-top:clamp(6px,1.6vw,12px);gap:clamp(8px,2vw,16px)}
+  .big{font-size:clamp(30px,7.4vw,58px)}
+  .big u{font-size:clamp(11px,2.4vw,16px)}
+  .verd{font-size:clamp(10.5px,2.3vw,14px);padding:clamp(3px,1vw,6px) clamp(8px,2.4vw,14px)}
+  .bar{height:clamp(5px,1.1vw,9px);margin-top:clamp(7px,1.8vw,12px)}
+
+  /* 主体宽度：窄屏贴齐、宽屏置中且留白充足 */
+  .wrap{width:min(92vw,980px);margin:0 auto;padding:clamp(8px,2vw,16px) 0 0}
+
+  /* 卡片 / 列 / 项目名称 */
+  .card{border-radius:clamp(13px,2.4vw,18px);padding:clamp(2px,1vw,5px) clamp(9px,2.6vw,17px);
+        margin-bottom:clamp(9px,2.2vw,15px)}
+  .sec-t{font-size:clamp(11px,2.3vw,13.5px);padding:clamp(7px,1.6vw,11px) 2px 2px}
+  .row{gap:clamp(7px,2.2vw,14px);padding:clamp(6px,1.4vw,11px) clamp(1px,.6vw,5px)}
+  .name .zh{font-size:clamp(12.5px,2.7vw,16.5px)}
+  .name .en{font-size:clamp(9px,1.9vw,11.5px);margin-top:clamp(1px,.3vw,2px)}
+
+  /* 1–9 数字按钮：尺寸与字级同步流体缩放，永远 9 颗完整显示不换行溢出 */
+  .pick{gap:clamp(2px,.55vw,4px)}
+  .pick button{width:clamp(25px,6.4vw,44px);height:clamp(30px,7.4vw,50px);
+               font-size:clamp(12px,3vw,19px);border-radius:clamp(7px,1.8vw,11px)}
+
+  /* 操作钮 */
+  .btns{gap:clamp(6px,1.4vw,11px);margin-bottom:12px}
+  .btns button{flex:1 1 clamp(78px,19vw,190px);padding:clamp(10px,2.4vw,15px) clamp(5px,1.2vw,12px);
+               font-size:clamp(11.5px,2.5vw,14.5px);border-radius:clamp(10px,2.4vw,13px);min-width:0}
+
+  .tip{font-size:clamp(10px,2.1vw,12px);margin:clamp(10px,2.2vw,18px) 0 clamp(76px,18vw,96px);line-height:1.75}
+  .eq{font-size:clamp(10px,2.1vw,11.5px);padding:clamp(8px,2vw,12px) clamp(10px,2.4vw,14px);line-height:1.8}
+  .tabbar{padding:clamp(4px,1vw,6px) clamp(6px,1.6vw,10px) calc(clamp(4px,1vw,6px) + env(safe-area-inset-bottom))}
+  .tabbar button{font-size:clamp(9px,1.9vw,11px);gap:0}
+  .tabbar button i{font-size:clamp(15px,3.4vw,19px)}
+  .toast{bottom:clamp(76px,19vw,96px);font-size:clamp(11.5px,2.4vw,13.5px);padding:clamp(8px,1.8vw,10px) clamp(14px,3.4vw,19px)}
+
+
+  /* ============================================================
+   CVA 描述性评估（SCA 咖啡价值评估 2024 第二版）
+   - 每个区段一条 0–15 强度滑杆（input[type=range]）+ 数值显示
+   - 滑杆可横向拖曳微调；点击数值可切换 1 的步距
+   - 香气 / 风味属性用 CATA 勾选框，可依附件表格独立勾选
+   ============================================================ */
+  .desc-card{margin-top:10px}
+  .desc-card .sec-t{justify-content:space-between;gap:8px}
+  .desc-card .sec-t .hint{font-size:9.5px;font-weight:600;color:var(--bean-l);letter-spacing:0;white-space:nowrap}
+  .dsec{margin:0 -3px;padding:11px 3px;border-bottom:1px dashed var(--line)}
+  .dsec:last-child{border-bottom:none}
+  .dsec .dt{display:flex;align-items:baseline;gap:6px;margin-bottom:7px;flex-wrap:wrap}
+  .dsec .dt .zh{font-size:12.5px;font-weight:800;color:var(--bean)}
+  .dsec .dt .en{font-size:9px;color:var(--sub);letter-spacing:.2px}
+  /* 强度滑杆：0–15 共 16 阶，可拖曳 */
+  .int{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .int label.int-lb{flex:1 1 auto;min-width:0;font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.6px}
+  .int .rail{position:relative;flex:1 1 auto;min-width:0;padding:3px 0;margin-right:2px}
+  .int .rail::after{content:"";position:absolute;left:0;right:0;top:50%;height:7px;transform:translateY(-50%);
+      background:repeating-linear-gradient(90deg,var(--faint) 0 1px,transparent 1px calc(100%/15));
+      border-radius:7px;pointer-events:none;opacity:.45}
+  .int input[type=range]{position:relative;z-index:2}
+  .int input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;margin:0;background:transparent;cursor:pointer}
+  .int input[type=range]:focus{outline:none}
+  .int input[type=range]::-webkit-slider-runnable-track{height:7px;border-radius:7px;background:var(--faint)}
+  .int input[type=range]::-moz-range-track{height:7px;border-radius:7px;background:var(--faint)}
+  .int .rail::before{content:"";position:absolute;left:0;top:50%;height:7px;transform:translateY(-50%);
+      width:var(--fill,0%);background:linear-gradient(90deg,var(--bean),var(--bean-l));
+      border-radius:7px;pointer-events:none;z-index:1;transition:width .12s linear}
+  .int input[type=range]::-moz-range-track{height:7px;border-radius:7px;background:var(--faint)}
+  .int input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;
+      background:#fff;border:2.5px solid var(--bean);margin-top:-6px;box-shadow:0 2px 5px rgba(111,92,63,.3);
+      transition:transform .12s}
+  .int input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:#fff;
+      border:2.5px solid var(--bean);box-shadow:0 2px 5px rgba(111,92,63,.3)}
+  .int input[type=range]:active::-webkit-slider-thumb{transform:scale(1.18)}
+  .int .val{width:42px;height:26px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);
+      color:var(--bean);font-size:12.5px;font-weight:800;font-family:inherit;text-align:center;line-height:24px;
+      cursor:pointer;flex:none;font-variant-numeric:tabular-nums}
+  .int .val.zero{color:var(--faint)}
+  /* 低 / 中 / 高 三段标记 */
+  .int ticks{display:flex;justify-content:space-between;font-size:8px;color:var(--faint);
+      letter-spacing:.4px;margin:-4px 0 6px;padding:0 calc(21px + 9px)}
+  /* CATA 勾选网格：3 列，贴合附件表格栏位密度 */
+  .cata{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px}
+  .cata.s2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cata label{display:flex;align-items:center;gap:4px;font-size:9.6px;color:var(--ink);line-height:1.25;
+      cursor:pointer;padding:2px 1px;min-height:0}
+  .cata label input{width:12px;height:12px;accent-color:var(--bean);flex:none;margin:0;cursor:pointer}
+  .cata.mf{grid-template-columns:1fr}
+  .cata.mf label{font-size:10px;padding:3px 1px}
+  /* ===== 综合评估区块化版面 ===== */
+  .eval-card{margin-top:10px}
+  .eval{margin:0 -3px 14px;padding:12px 9px 4px;border:1px solid var(--line);border-left:4px solid var(--bean);
+         border-radius:13px;background:linear-gradient(180deg,#fffdf9,#fbf8f2);box-shadow:0 2px 9px rgba(111,92,63,.07)}
+  .eval .big-t{font-size:clamp(13px,2.8vw,16px);color:var(--bean);letter-spacing:.6px;padding:0 2px 8px;
+               border-bottom:2px solid var(--gold);margin-bottom:9px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .eval .big-t .en2{font-size:9px;font-weight:600;color:var(--bean-l);letter-spacing:.2px}
+  .eval .subsec{margin-bottom:11px}
+  .eval .sub-t{font-size:10.5px;color:var(--bean-l);letter-spacing:.9px;padding:0 0 6px}
+  .eval .sub-t::before{background:var(--bean-l)}
+  .eval .dsec{padding:9px 2px}
+  .eval .emogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px 14px}
+  .eval .emo{display:flex;align-items:center;gap:9px;padding:6px 3px;border-bottom:1px dashed var(--line)}
+  .eval .emo:last-child{border-bottom:none}
+  .eval .emo .zh{font-size:12.5px}
+  .eval .emo .en{font-size:9px}  .cata.mf label .sub2{color:var(--sub);font-size:8.6px;margin-left:2px;font-weight:400}
+  /* 记录页 */
+  .rec-head{padding:clamp(4px,1vw,8px) 2px clamp(2px,.6vw,5px);gap:clamp(8px,2vw,14px)}
+  .rec-head .t{font-size:clamp(11px,2.3vw,13px)}
+  .rec-head .c,.empty{font-size:clamp(10.5px,2.1vw,12px)}
+  th,td{padding:clamp(5px,1.1vw,7px) clamp(1px,.5vw,3px);font-size:clamp(9.5px,1.9vw,11.5px)}
+  th{font-size:clamp(8.5px,1.7vw,10px)}
+  td.cupcell{font-size:clamp(11px,2.3vw,12.5px)}
+  td.sc{font-size:clamp(11.5px,2.4vw,13px)}
+  td.del{font-size:clamp(13px,2.6vw,15px)}
+
+  /* 语言选择器 */
+  .langbox{margin-left:auto}
+  .langbox select{font-family:inherit;font-size:clamp(10.5px,2.1vw,12px);font-weight:700;
+    color:var(--bean);background:rgba(255,255,255,.22);border:1.3px solid rgba(255,255,255,.45);
+    border-radius:clamp(8px,1.8vw,11px);padding:clamp(3px,.8vw,5px) clamp(6px,1.4vw,9px);
+    -webkit-appearance:none;appearance:none;cursor:pointer}
+  .langbox select:focus{outline:none;border-color:#fff;background:rgba(255,255,255,.34)}
+
+  /* ============================================================
+   字级手动缩放（Ａ＋／Ａ－）：作用在 body.fs-zoom 上
+   ============================================================ */
+  body.fs-zoom{font-size:calc(100% * var(--fs-scale))}
+  body.fs-zoom header h1{font-size:calc(clamp(15.5px,3.4vw,25px) * var(--fs-scale))}
+  body.fs-zoom header .sub{font-size:calc(clamp(10px,2.2vw,13px) * var(--fs-scale))}
+  body.fs-zoom .big{font-size:calc(clamp(30px,7.4vw,58px) * var(--fs-scale))}
+  body.fs-zoom .big u{font-size:calc(clamp(11px,2.4vw,16px) * var(--fs-scale))}
+  body.fs-zoom .verd{font-size:calc(clamp(10.5px,2.3vw,14px) * var(--fs-scale))}
+  body.fs-zoom .sec-t{font-size:calc(clamp(11px,2.3vw,13.5px) * var(--fs-scale))}
+  body.fs-zoom .name .zh{font-size:calc(clamp(12.5px,2.7vw,16.5px) * var(--fs-scale))}
+  body.fs-zoom .name .en{font-size:calc(clamp(9px,1.9vw,11.5px) * var(--fs-scale))}
+  body.fs-zoom .pick button{font-size:calc(clamp(12px,3vw,19px) * var(--fs-scale))}
+  body.fs-zoom .btns button{font-size:calc(clamp(11.5px,2.5vw,14.5px) * var(--fs-scale))}
+  body.fs-zoom .tip{font-size:calc(clamp(10px,2.1vw,12px) * var(--fs-scale))}
+  body.fs-zoom .explain{font-size:calc(10.5px * var(--fs-scale))}
+  body.fs-zoom .cr{font-size:calc(9.5px * var(--fs-scale))}
+  body.fs-zoom .eq{font-size:calc(clamp(10px,2.1vw,11.5px) * var(--fs-scale))}
+  body.fs-zoom .tabbar__btns button{font-size:calc(clamp(9px,1.9vw,11px) * var(--fs-scale))}
+  body.fs-zoom .toast{font-size:calc(clamp(11.5px,2.4vw,13.5px) * var(--fs-scale))}
+  body.fs-zoom .rec-head .t{font-size:calc(clamp(11px,2.3vw,13px) * var(--fs-scale))}
+  body.fs-zoom .rec-head .c,.empty{font-size:calc(clamp(10.5px,2.1vw,12px) * var(--fs-scale))}
+  body.fs-zoom th,body.fs-zoom td{font-size:calc(clamp(9.5px,1.9vw,11.5px) * var(--fs-scale))}
+  body.fs-zoom th{font-size:calc(clamp(8.5px,1.7vw,10px) * var(--fs-scale))}
+  body.fs-zoom td.cupcell{font-size:calc(clamp(11px,2.3vw,12.5px) * var(--fs-scale))}
+  body.fs-zoom td.sc{font-size:calc(clamp(11.5px,2.4vw,13px) * var(--fs-scale))}
+
+  /* Ａ＋／Ａ－ 字级调整钮 */
+  .fsbox{display:flex;gap:5px;margin-left:auto;align-items:center}
+  .fsbox button{width:clamp(26px,5.4vw,34px);height:clamp(26px,5.4vw,34px);border:1.5px solid rgba(255,255,255,.55);
+    background:rgba(255,255,255,.16);color:#fff;font-family:inherit;font-weight:800;border-radius:9px;
+    font-size:clamp(13px,2.6vw,17px);line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .fsbox button:active{transform:scale(.9);background:rgba(255,255,255,.34)}
+  .fsbox button b{font-weight:800}
+
+  /* ============================================================
+   横向模式（手机横过来）：评分项左右双栏，按钮放大更好按
+   侦测条件：landscape + 视窗宽高比 > 1.2（典型手机横向）
+   ============================================================ */
+  @media (orientation:landscape) and (max-height:520px){
+    body{padding-bottom:56px}
+    /* header 压扁一点 */
+    header{padding:8px 14px}
+    header h1{font-size:clamp(15px,3vw,20px)}
+    .headrow{margin-top:5px}
+    .big{font-size:clamp(28px,6vw,44px)}
+    .bar{margin-top:6px}
+    /* 双栏：8 项评分切成左右两栏 */
+    #items{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px}
+    .row{flex-wrap:nowrap;gap:8px;padding:7px 4px}
+    /* 数字按钮放大 */
+    .pick button{width:clamp(34px,8vw,52px);height:clamp(38px,9vw,56px);font-size:clamp(15px,3.6vw,21px);border-radius:11px}
+    /* 操作钮一排摊开 */
+    .btns button{flex:1 1 auto;min-width:0;padding:11px 6px;font-size:clamp(11.5px,2.4vw,13.5px)}
+    /* 计算逻辑卡片与 tip 缩小间距 */
+    .tip{margin-bottom:clamp(70px,16vw,92px)}
+    /* 记录页表格在手机横向也让每列更宽松 */
+    .recbox table{min-width:clamp(480px,88vw,900px)}
+  }
+
+  /* ===== 笔记栏（新增，不影响任何既有评分／版型规则） ===== */
+  .notebox{margin:7px 0 2px}
+  .notebox textarea{font-family:inherit;font-size:11.5px;font-weight:500;color:var(--ink);
+    width:100%;min-height:26px;max-height:126px;height:26px;resize:none;overflow:hidden;
+    padding:6px 9px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);
+    box-sizing:border-box;line-height:1.55;display:block;transition:border-color .15s,background .15s,height .12s}
+  .notebox textarea::placeholder{color:#b6a892;font-weight:400}
+  .notebox textarea:focus{outline:none;border-color:var(--gold);background:#fff;
+    box-shadow:0 0 0 3px rgba(192,154,90,.16)}
+  .notebox textarea.has{color:var(--bean);font-weight:600}
+  /* 笔记列跟随流体缩放 */
+  body.fs-zoom .notebox textarea{font-size:calc(clamp(11px,2.3vw,12.5px) * var(--fs-scale))}
+  /* 记录表笔记列 */
+  th.nt,td.nt{font-size:8.4px;color:#a08a6e;font-weight:600;max-width:150px;min-width:88px;
+    white-space:normal;line-height:1.35;word-break:break-word;background:#fbf8f2;
+    border-left:1px dashed var(--line);border-right:1px dashed var(--line)}
+  td.nt{font-size:9.4px;font-weight:400;color:var(--ink);text-align:left;padding:6px 6px}
+  td.nt:empty::after{content:"—";color:var(--faint)}
+  body.fs-zoom th.nt{font-size:calc(8.4px * var(--fs-scale))}
+  body.fs-zoom td.nt{font-size:calc(9.4px * var(--fs-scale))}
+</style>
+</head>
+<body>
+
+<div class="slist" id="slist"></div>
+<div class="scur" id="scur"></div>
+<div class="mask" id="mask">
+  <div class="dlg">
+    <h3>设定本次杯测样品</h3>
+    <div class="ds">输入本次要杯测的样品数量，系统会为每个样品建立独立的评分页，左侧（手机为底部）可快速切换。</div>
+    <label class="t">样品数量</label>
+    <input type="number" id="setupN" min="1" max="24" value="3" inputmode="numeric">
+    <div class="err" id="setupErr">请输入 1–24 之间的数字</div>
+    <div class="hint">最少 1 个，最多 24 个；切换后目前样品的评分会自动暂存。</div>
+    <div class="acts">
+      <button class="no" onclick="closeSetup()">取消</button>
+      <button class="ok" onclick="applySetup()">确定</button>
+    </div>
+  </div>
+</div>
+<header>
+  <div class="headtop">
+    <h1>CVA 综合评估<span class="ver" id="buildVer"></span></h1>
+    <button class="setbtn" id="setupBtn" onclick="openSetup()">⚙ 设定样品</button>
+  </div>
+  <div class="topbar">
+    <div class="ti"><label>杯测日期 <i>DATE</i></label><input type="date" id="cupped"></div>
+    <div class="ti"><label>填表人员 <i>Cupper</i></label><input type="text" id="cupper" placeholder="请输入杯测师姓名" autocomplete="off"></div>
+  </div>
+  <div class="meta">
+    <div class="mi"><label>样品名称</label><input type="text" id="sample" placeholder="例如：耶加雪菲 果丁丁 水洗 G1" autocomplete="off"></div>
+    <div class="mi full"><label>烘焙程度　ROAST LEVEL</label>
+      <div class="roast">
+        <div class="roast-pick" id="roastPick">
+          <label><input type="checkbox" name="roast" value="1" onclick="toggleRoast(1,this)"><span>极浅<small>VERY LIGHT</small></span></label>
+          <label><input type="checkbox" name="roast" value="2" onclick="toggleRoast(2,this)"><span>浅<small>LIGHT</small></span></label>
+          <label><input type="checkbox" name="roast" value="3" onclick="toggleRoast(3,this)"><span>浅中<small>MED-LIGHT</small></span></label>
+          <label><input type="checkbox" name="roast" value="4" onclick="toggleRoast(4,this)"><span>中<small>MEDIUM</small></span></label>
+          <label><input type="checkbox" name="roast" value="5" onclick="toggleRoast(5,this)"><span>中深<small>MED-DARK</small></span></label>
+          <label><input type="checkbox" name="roast" value="6" onclick="toggleRoast(6,this)"><span>深<small>DARK</small></span></label>
+        </div>
+        <div class="roast-now" id="roastNow"></div>
+      </div>
+    </div>
+  </div>
+  <div class="sub">｜ 描述性评估 15 分量尺，不计入评分｜ 情感性评分 1–9 即时换算总分</div>
+  <div class="headrow">
+    <div><div class="big" id="score">0.00<u>分</u></div></div>
+    <div class="verd" id="verdict">尚未评分</div>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="fsbox">
+    <button onclick="fsStep(1)" title="放大字级">Ａ<b style="font-size:0.62em;vertical-align:super">＋</b></button>
+    <button onclick="fsStep(-1)" title="缩小字级">Ａ<b style="font-size:0.62em;vertical-align:sub">－</b></button>
+  </div>
+</header>
+
+<!-- ===== 综合评估页：情感性评分 + 描述性评估 ===== -->
+<div class="page on" id="p-desc">
+  <div class="wrap">
+    <div class="card eval-card" id="evalcard"></div>
+
+    <div class="btns">
+      <button class="gold" onclick="exportPageCSV()">📤 分享此页样品（CSV）</button>
+      <button class="gold" onclick="shareAllCSV()">📤 分享全部样品（CSV）</button>
+      <button onclick="resetPage()">✕ 清除此页样品内容</button>
+      <button onclick="clearAllSamples()">🗑 清除所有样品内容</button>
+    </div>
+
+    <div class="card" id="logicCard">
+      <div class="explain">说明：情感性评分与描述性评估即时同步，存档时两者一起记录。<br>三种存档方式并行：自动存本机 + 另存 HTML + 分享。</div>
+      <div class="logic-rule"></div>
+      <div class="sec-t">计算逻辑</div>
+      <div class="eq">
+        <b>各项总和 ≤ 0 时，情感性总分 = 0</b><br>
+        <b>各项总和 &gt; 0 时，情感性总分 = 0.65625 × 各项总和 + 52.75</b><br>
+        结果四舍五入至小数两位 ｜ 情感性评分已评 <b id="cnt">0</b> / 8 项
+      </div>
+      <div class="logic-rule"></div>
+      <div class="cr">© <span id="crYear"></span> Andrew Wu&nbsp;&nbsp;All rights reserved.</div>
+    </div>
+
+    <div class="card" id="bottomSpacer" role="note" aria-label="页面底部留白区">
+      <span class="v">END</span>
+      <span class="visually-hidden">页面内容结束，下方为留白区域</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 记录页 ===== -->
+<div class="page" id="p-rec">
+  <div class="wrap">
+    <div class="card" style="padding:9px 10px">
+      <div class="rec-head"><div class="t">评分记录</div><div class="c" id="reccnt">0 笔</div></div>
+      <div class="btns" style="margin:8px 0 0">
+        <button class="pri" onclick="exportPageCSV()">📤 汇出本页 CSV</button>
+        <button class="gold" onclick="shareAllCSV()">📤 分享全部样品（CSV）</button>
+      </div>
+      <div class="recbox">
+        <table id="rectbl">
+          <thead><tr>
+            <th style="text-align:left;padding-left:8px">样品</th><th>日期</th><th>填表人</th><th>总分</th>
+            <th>1 干香</th><th class="nt">香气属性笔记</th><th>2 湿香</th><th class="nt">香气情感性笔记</th>
+            <th>3 风味</th><th class="nt">风味／余韵属性笔记</th><th>5 余韵</th><th class="nt">风味／余韵情感性笔记</th>
+            <th>6 酸质</th><th class="nt">酸质属性笔记</th><th class="nt">酸质情感性笔记</th>
+            <th>7 甜感</th><th class="nt">甜感属性笔记</th><th class="nt">甜感情感性笔记</th>
+            <th>4 口感</th><th class="nt">口感属性笔记</th><th class="nt">口感情感性笔记</th>
+            <th>8 综合</th><th class="nt">综合评估情感性笔记</th>
+            <th>干属</th><th>湿属</th><th>风属</th><th>韵属</th><th>酸属</th><th>甜属</th><th>口属</th>
+            <th>干味</th><th>湿味</th><th>风味觉</th><th>韵味</th><th>酸味</th><th>甜味</th><th>口味</th>
+            <th>干强</th><th>湿强</th><th>风强</th><th>韵强</th><th>酸强</th><th>甜强</th><th>口强</th><th>烘焙</th>
+<th>总和</th>
+          </tr></thead>
+          <tbody id="rectb"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="recempty">尚无记录，请先完成评分并存档</div>
+    </div>
+    <div class="card">
+      <div class="sec-t">存档与备份说明</div>
+      <div class="eq">
+        <b>① 自动存本机</b>：本页已内建自动暂存，评分与填写内容会即时写入浏览器本机储存，关掉页面再回来仍在，无需手动暂存。<br>
+        <b>② 分享此页样品（CSV）</b>：仅把「目前这一页」的样品分页信息输出成 CSV（档案含 BOM，Excel 开启中文不乱码），内容包含情感性评分、描述性强度、属性勾选与全部笔记。<b>输出前会检查：7 项描述性强度、8 项情感性评分、3 组属性勾选（干香气/湿香气、风味/余韵、口感）都必须完成，未完成的项会逐条列出提醒；填表人、样品名称与文字笔记不在此限。</b><br>
+        <b>③ 分享全部样品（CSV）</b>：把全部样品一次输出成同一份 CSV，栏位与「分享此页样品」完全一致，输出前同样先通过上列完整性检查。<br>
+        <b>④ 清除此页样品内容</b>：只清除当前样品分页的填写项目，样品名称、日期、烘焙程度与评分一律清空，唯独保留填表人姓名。<br>
+        <b>⑤ 清除所有样品内容</b>：清除全部样品的所有填写内容与本机记录，包含填表人姓名，且无法复原。<br>
+        ⚠ 清除浏览器资料同样会删除本机记录，重要资料请务必以 CSV 备份。
+      </div>
+    </div>
+  </div>
+
+<div class="tabbar">
+  <div class="tabbar__btns">
+    <button id="t-desc" class="on" onclick="go('desc')"><i>◎</i>综合评估</button>
+    <button id="t-rec" onclick="go('rec')"><i>☰</i>记录</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   字级手动缩放（Ａ＋／Ａ－）：5 级，0.85 / 1.00 / 1.15 / 1.30 / 1.45
+   设定存到 localStorage，下次开启自动套用
+   ============================================================ */
+(function applyFontSize(){
+  const SCALES=[0.85,1,1.15,1.3,1.45];
+  let idx=1;
+  try{const s=parseInt(localStorage.getItem("cva_fs_idx"),10);if(!isNaN(s)&&s>=0&&s<SCALES.length)idx=s}catch(e){}
+  document.documentElement.style.setProperty('--fs-scale',SCALES[idx]);
+  document.body.classList.add('fs-zoom');
+  /* 把 idx 暴露给 fsStep 使用 */
+  window.__fsIdx=idx;window.__fsScales=SCALES;
+})();
+function fsStep(dir){
+  const SCALES=window.__fsScales, cur=window.__fsIdx;
+  const next=Math.max(0,Math.min(SCALES.length-1,cur+dir));
+  if(next===cur)return;
+  window.__fsIdx=next;
+  try{localStorage.setItem("cva_fs_idx",next)}catch(e){}
+  document.documentElement.style.setProperty('--fs-scale',SCALES[next]);
+  document.body.classList.add('fs-zoom');
+  toast(next>1?"字级已放大":(next<1?"字级已缩小":"字级已还原"));
+}
+
+/* ===== 清除所有样品内容：连同历史记录一起清除（危险操作，二次确认） ===== */
+/* 清除「本页」所有填写内容，但保留填表人姓名（共用） */
+function clearPageKeepCupper(){
+  /* 保留姓名：优先从 SAMPLES 读取（已存档的值），其次才从 DOM 读取当前输入 */
+  const cu=SAMPLES[SID]&&SAMPLES[SID].cupper!==undefined?SAMPLES[SID].cupper:document.getElementById('cupper').value;
+  /* 基本栏位 */
+  document.getElementById('sample').value="";
+  document.getElementById('cupped').value="";
+  document.getElementById('cupper').value="";
+  /* 烘焙程度：还原为未选择 */
+  document.getElementById('roastNow').innerHTML='目前：<b>未选择</b>　（0 / 6）';
+  document.querySelectorAll('.roast-pick input[type=checkbox]').forEach(c=>c.checked=false);
+  SAMPLES[SID].roast=0;
+  /* 情感性评分 */
+  STATE.fill("");
+  document.querySelectorAll('.pick button.on').forEach(b=>b.classList.remove('on'));
+  /* 描述性：强度 / 勾选 / 笔记 */
+  /* 描述性：强度 / 属性 / 味觉 / 笔记 —— 整段重建，避免 DESC_STATE 与 SAMPLES[i].desc 不同步 */
+  DESC.forEach(sec=>{
+    if(!SAMPLES[SID].desc)SAMPLES[SID].desc=JSON.parse(JSON.stringify(DESC_STATE));
+    SAMPLES[SID].desc[sec.k]={int:0,attrs:[],taste:[]};
+    const wrap=document.getElementById('d-'+sec.k);
+    if(wrap){const r=wrap.querySelector('.rail input[type=range]');if(r)r.value=0;}
+  });
+  DESC_STATE={int:0,attrs:[],taste:[],notes:{}};
+  DESC.forEach(sec=>DESC_STATE[sec.k]={int:0,attrs:[],taste:[]});
+  /* 笔记栏：情感性（#evalcard）+ 描述性（.dsec）全部清空，并去掉 .has 高亮 */
+  document.querySelectorAll('#evalcard textarea[data-note], .dsec textarea').forEach(t=>{
+    t.value="";t.classList.remove('has');growNote(t);
+  });
+  document.querySelectorAll('.cata input[type=checkbox]').forEach(c=>c.checked=false);
+  /* 恢复填表人姓名 */
+  document.getElementById('cupper').value=cu;
+  SAMPLES[SID].cupper=cu;
+  /* 关键：同时清 DKEY（DESC_STATE 来源）与 SKEY（SAMPLES 来源），否则画面与存档不同步 */
+  DESC_STATE={int:0,attrs:[],taste:[],notes:{}};
+  DESC.forEach(sec=>DESC_STATE[sec.k]={int:0,attrs:[],taste:[]});
+  if(!SAMPLES[SID].desc)SAMPLES[SID].desc=JSON.parse(JSON.stringify(DESC_STATE));
+  SAMPLES[SID].desc={int:0,attrs:[],taste:[],notes:{}};
+  DESC.forEach(sec=>SAMPLES[SID].desc[sec.k]={int:0,attrs:[],taste:[]});
+  saveDesc();
+  persist();
+  applyDescUI(SID);
+  loadDesc();
+  saveCurrent();renderRec();calc();
+}
+/* 原有：清除所有样品内容（含填表人姓名） */
+function clearEverything(force){
+  if(!force){
+    if(!confirm("⚠️ 确定要「全部清零」吗？\n\n这会清除【所有已存记录】以及本页评分，且无法复原。\n\n只清本页请点「✕ 清空重评」。"))return;
+    /* 再二次确认，避免误触 */
+    if(!confirm("最后确认：真的要删除全部 " + records.length + " 笔记录吗？"))return;
+  }
+  records=[];STATE.fill("");
+  document.querySelectorAll('.pick button').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.cata input[type=checkbox]').forEach(c=>c.checked=false);
+  document.querySelectorAll('#evalcard textarea[data-note], .dsec textarea').forEach(t=>{
+    t.value="";t.classList.remove('has');growNote(t);
+  });
+  document.getElementById('sample').value="";
+  document.getElementById('cupped').value="";
+  document.getElementById('cupper').value="";
+  document.getElementById('roastNow').innerHTML='目前：<b>未选择</b>';
+  document.querySelectorAll('.roast-pick input[type=checkbox]').forEach(c=>c.checked=false);
+  (SAMPLES||[]).forEach(s=>{s.desc={int:0,attrs:[],taste:[],notes:{}};
+    DESC.forEach(sec=>{s.desc[sec.k]={int:0,attrs:[],taste:[]};});s.roast=0;});
+  DESC_STATE={int:0,attrs:[],taste:[],notes:{}};
+  DESC.forEach(sec=>DESC_STATE[sec.k]={int:0,attrs:[],taste:[]});
+  try{localStorage.removeItem(KEY)}catch(e){}
+  autosave();renderRec();
+  /* 把画面上的滑杆 / 数值方块 / 填充条强制归零（currentSample 可能已不是原本那页，先备份还原） */
+  const bak=SID;
+  DESC.forEach(sec=>setInt(sec.k,0,false));
+  applyDescUI(bak);
+  /* 关键：同时清 DKEY（DESC_STATE）与 SKEY（SAMPLES），否则画面与存档不同步 */
+  DESC_STATE={int:0,attrs:[],taste:[],notes:{}};
+  DESC.forEach(sec=>DESC_STATE[sec.k]={int:0,attrs:[],taste:[]});
+  saveDesc();
+  persist();
+  calc();
+  toast(force?"已清除所有样品内容":"已全部清零");
+}
+
+/* ===== 系统语言自动侦测：macOS / Windows / iOS / Android 皆适用 ===== */
+(function detectLang(){
+  let pick="zh";
+  const nav=window.navigator||{};
+  const tags=[];
+  if(nav.language)tags.push(nav.language);
+  if(nav.languages&&nav.languages.length)Array.prototype.push.apply(tags,nav.languages);
+  if(nav.userLanguage)tags.push(nav.userLanguage);
+  if(nav.browserLanguage)tags.push(nav.browserLanguage);
+  if(nav.systemLanguage)tags.push(nav.systemLanguage);
+  const ua=(nav.userAgent||"").toLowerCase();
+  const prefer=tags.join(",").toLowerCase();
+  /* 简体中文地区优先判定 */
+  const zhCN=/zh-(cn|hans|sg|my)|zh@cn|\bzhcn\b/;
+  const explicit=/zh-(hk|tw|mo|hant)|zh@tw|\bzhtw\b|\bzhhk\b/;
+  if(zhCN.test(prefer)||/\bzh-cn\b/.test(ua))pick="zhCN";
+  else if(explicit.test(prefer))pick="zh";
+  else if(/^zh/.test(prefer))pick="zh";
+  else if(/^en/.test(prefer))pick="en";
+  else if(/^(ja|ko|es|fr|de|it|pt|ru)/.test(prefer)){
+    pick="en"; /* 暂以英文兜底，避免半翻译 */
+  }
+  /* 若使用者曾手动选过语言，以手动为准 */
+  try{const saved=localStorage.getItem("cva_lang");if(saved==="zh"||saved==="zhCN"||saved==="en")pick=saved}catch(e){}
+  document.documentElement.setAttribute("data-lang",pick);
+  const sel=document.getElementById('langsel');
+  if(sel){sel.value=pick;sel.onchange=e=>setLang(e.target.value)}
+})();
+/* ============ 8 项评分定义（上一笔 CVA 计算器） ============ */
+const ITEMS=[
+  ["干香","Dry Aroma"],["湿香","Wet Aroma"],["风味","Flavor"],["口感","Mouthfeel"],
+  ["余韵","Aftertaste"],["酸表现","Acidity"],["甜感","Sweetness"],["综合评估","Overall"]
+];
+/* 情感评分项索引（对应 ITEMS 顺序） */
+const EMO_INDEX={dry:0,wet:1,flav:2,body:3,aft:4,aci:5,swt:6,mf:3,overall:7};
+/* 情感性评估子区块的显示标题（与描述性评估对齐；不更动 ITEMS 定义与记录表列名） */
+const EMO_TITLE={0:["干香气","Dry Aroma"],1:["湿香气","Wet Aroma"]};
+
+
+const AROMA_ATTRS=["花香","果香 / 莓果","柑橘类水果","干果","咖啡樱桃","酸 / 尖酸发酵",
+                   "甜 / 香草·香草醛·黄糖","坚果 / 可可","香料","烘烤的 / 谷物","烧焦的 / 烟草",
+                   "绿色 / 植物","化学","陈腐 / 泥土","木质","其他"];
+const FLAVOR_ATTRS=["花香","果香 / 莓果","柑橘类水果","干果","酸 / 尖酸发酵",
+                    "甜 / 香草·香草醛·黄糖","坚果 / 可可","香料","烘烤的 / 谷物","烧焦的 / 烟草",
+                    "绿色 / 植物","化学","陈腐 / 泥土","木质","其他"];
+const MOUTHFEEL_ATTRS=["粗糙（砂砾、粉感、沙子）","油滑的","滑顺（绒滑、丝滑、糖浆）","口腔干燥","金属感"];
+const TASTE_ATTRS=["咸","酸","甜","苦","鲜味"];
+/* 各区段「属性勾选」的中文名称表（供汇出 / 记录页展开使用，放在本区定义之后避免 TDZ） */
+const ATTR_LABELS={dry:AROMA_ATTRS,wet:AROMA_ATTRS,flav:FLAVOR_ATTRS,aft:FLAVOR_ATTRS,mf:MOUTHFEEL_ATTRS};
+function attrsTxt(d,k){const st=(d&&typeof d==="object"&&!Array.isArray(d))?d[k]:null;
+  return st&&st.attrs&&st.attrs.length?(st.attrs.map(i=>(ATTR_LABELS[k]||[])[i])||[]).join("、"):"";}
+function tasteTxt(d,k){const st=(d&&typeof d==="object"&&!Array.isArray(d))?d[k]:null;
+  return st&&st.taste&&st.taste.length?(st.taste.map(i=>TASTE_ATTRS[i])||[]).join("、"):"";}
+
+/* ============================================================
+   描述性评估资料（SCA CVA 2024 第二版 · 参考附件中文表格）
+   - 7 个区段各有独立的 0–15 强度（15 分量尺）
+   - 属性用 CATA 勾选：花香/果香/酸/甜/烘烤/坚果可可/香料/植物/化学/陈腐泥土/木质/其他
+   - 「主要味觉」为风味 / 余韵共用栏目
+   ============================================================ */
+const DESC=[
+  {k:"dry",  zh:"干香气", en:"Dry Aroma"},
+  {k:"wet",  zh:"湿香气", en:"Wet Aroma"},
+  {k:"flav", zh:"风味",   en:"Flavor"},
+  {k:"aft",  zh:"余韵",   en:"Aftertaste", hasTaste:true},
+  {k:"aci",  zh:"酸质",   en:"Acidity"},
+  {k:"swt",  zh:"甜感",   en:"Sweetness"},
+  {k:"mf",   zh:"口感",   en:"Mouthfeel"}
+];
+/* 配对栏位：上为 A 区段强度、下为 B 区段强度，其后接一组两者共用的勾选框
+   primary = 承载勾选结果的主区段（湿香气 / 余韵） */
+const PAIRED=[
+  {a:"dry", b:"wet", primary:"wet", attrs:AROMA_ATTRS,  taste:null,         emo:[0,1], zh:"干香气 / 湿香气", en:"Dry / Wet Aroma",        sub:"属性同时套用于干香气与湿香气"},
+  {a:"flav",b:"aft", primary:"aft", attrs:FLAVOR_ATTRS, taste:TASTE_ATTRS,  emo:[2,4], zh:"风味 / 余韵",     en:"Flavor / Aftertaste",    sub:"属性同时套用于风味与余韵"}
+];
+/* 情感评分项索引（对应 ITEMS 顺序） */
+const DKEY="cva_desc_v1";
+let DESC_STATE={};
+
+
+const KEY="cva_scores_v2";
+let records=[];
+try{records=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){records=[]}
+const STATE=ITEMS.map(()=>"");
+
+/* ============ 计算（上上笔：1–9 整数；上一笔：0.65625×sum+52.75） ============ */
+
+/* ============ 笔记栏（跨刷新保存、随记录一起存档、可回填、可汇出） ============
+   每个 textarea 以 data-note="key" 标识；内容存入 DESC_STATE 的 notes 物件，
+   随样品一起存 localStorage / 存档 / 汇出 / 另存网页，并在切换样品时回填。 */
+const NOTES=[
+  {k:"aroma_attr", ph:"香气属性笔记：描述性评估勾选的香气属性，例：柑橘皮、茉莉、红糖甜香…"},
+  {k:"aroma_emo",  ph:"香气情感性笔记：情感性评估中干香气／湿香气的整体气息感受，例：干净明亮、层次分明…"},
+  {k:"flav_attr",  ph:"风味／余韵属性笔记：描述性评估勾选的风味属性，例：蜜渍橙皮、黑糖、可可…"},
+  {k:"flav_emo",   ph:"风味／余韵情感性笔记：情感性评估中风味／余韵的整体印象，例：甜感撑起酸质、尾韵绵长…"},
+  {k:"aci_desc",   ph:"酸质属性笔记：描述性评估中酸质的种类与品质，例：柑橘酸、柔顺、尖锐刺激…"},
+  {k:"aci_emo",    ph:"酸质情感性笔记：情感性评估中酸质带来的感受，例：活泼讨喜、过强遮盖甜感…"},
+  {k:"swt_desc",   ph:"甜感属性笔记：描述性评估中甜感的种类与来源，例：蜂蜜甜、黄糖、焦糖…"},
+  {k:"swt_emo",    ph:"甜感情感性笔记：情感性评估中甜感带来的感受，例：圆润饱满、甜感偏低…"},
+  {k:"mf_attr",    ph:"口感属性笔记：描述性评估勾选的口感属性，例：丝滑、粉感、口腔干燥…"},
+  {k:"mf_emo",     ph:"口感情感性笔记：情感性评估中口感的整体感受，例：厚实绵密、略粗糙…"},
+  {k:"overall",    ph:"综合评估情感性笔记：情感性评估中最后的整体评价与建议，例：平衡佳、适合浅焙…"}
+];
+function noteHTML(k,ph){
+  return `<div class="notebox"><textarea data-note="${k}" rows="1" maxlength="500" placeholder="${ph}" oninput="growNote(this)" onblur="saveNote(this)"></textarea></div>`;
+}
+/* textarea 自动增高：1–6 行，超出后内部滚动 */
+function growNote(el){
+  el.style.height='26px';
+  const h=Math.min(126,Math.max(26,el.scrollHeight));
+  el.style.height=h+'px';
+  el.style.overflowY=h>=126?'auto':'hidden';
+  el.classList.toggle('has',!!el.value.trim());
+}
+function saveNote(el){
+  const k=el.dataset.note;if(!k)return;
+  const v=el.value.trim();
+  if(!DESC_STATE.notes)DESC_STATE.notes={};
+  if(v){DESC_STATE.notes[k]=v}else{delete DESC_STATE.notes[k]}
+  saveDesc();
+}
+/* 切换样品时回填笔记 */
+function fillNotes(notes){
+  const n=notes||(DESC_STATE.notes)||{};
+  document.querySelectorAll('#evalcard textarea[data-note]').forEach(el=>{
+    el.value=n[el.dataset.note]||"";
+    el.classList.toggle('has',!!n[el.dataset.note]);
+    growNote(el);
+  });
+}
+/* 读取目前所有笔记（存档时呼叫） */
+function readNotes(){const o={};document.querySelectorAll('#evalcard textarea[data-note]').forEach(el=>{const v=el.value.trim();if(v)o[el.dataset.note]=v});return o}
+
+/* ============ 综合评估渲染：区块化，每区块含描述性 + 情感性两个次区块 ============ */
+(function buildEval(){
+  const box=document.getElementById('evalcard');
+  /* 配对区块：干/湿香气、风味/余韵 */
+  PAIRED.forEach(pr=>{
+    const sec=document.createElement('div');sec.className='eval';
+    const a=DESC.find(d=>d.k===pr.a), b=DESC.find(d=>d.k===pr.b);
+    let taste='';
+    if(pr.taste){
+      taste='<div class="subsec"><div class="sec-t sub-t">主要味觉（2）</div>'+
+        '<div class="cata s2 taste-block">'+pr.taste.map((t,i)=>
+          `<label><input type="checkbox" class="cata" data-paired="${pr.a},${pr.b}" data-t="1" data-i="${i}"><span>${t}</span></label>`).join('')+
+        '</div></div>';
+    }
+    sec.innerHTML=`<div class="sec-t big-t">${pr.zh}</div>
+      <div class="subsec">
+        <div class="sec-t sub-t">描述性评估</div>
+        ${[a,b].map(d=>`
+        <div class="dsec">
+          <div class="dt"><span class="zh">${d.zh}</span><span class="en">${d.en}　强度 0–15</span></div>
+          <div class="int">
+            <label class="int-lb">强度 INTENSITY</label>
+            <div class="rail"><input type="range" min="0" max="15" step="1" value="0" data-sec="${d.k}" oninput="setInt('${d.k}',this.value,true)"></div>
+            <div class="val zero" id="dv_${d.k}" onclick="stepInt('${d.k}',1)">0</div>
+          </div>
+          <div class="ticks"><span>低 0–5</span><span>中 5–10</span><span>高 10–15</span></div>
+        </div>`).join('')}
+        <div class="dsec pair">
+          <div class="dt"><span class="zh">${pr.zh} 属性</span><span class="en">${pr.en}　${pr.sub}</span></div>
+          <div class="cata">${pr.attrs.map((at,i)=>
+            `<label><input type="checkbox" class="cata" data-paired="${pr.a},${pr.b}" data-t="0" data-i="${i}"><span>${at}</span></label>`).join('')}</div>
+        </div>
+        ${taste}
+        ${noteHTML(pr.a==="dry"?"aroma_attr":"flav_attr",(NOTES.find(x=>x.k===(pr.a==="dry"?"aroma_attr":"flav_attr"))||{}).ph)}
+      </div>
+      <div class="subsec">
+        <div class="sec-t sub-t">情感性评估</div>
+        <div class="emogrid stack">${pr.emo.map(i=>emoHTML(i)).join('')}</div>
+        ${noteHTML(pr.a==="dry"?"aroma_emo":"flav_emo",(NOTES.find(x=>x.k===(pr.a==="dry"?"aroma_emo":"flav_emo"))||{}).ph)}
+      </div>`;
+    box.appendChild(sec);
+  });
+    /* 单一区段：酸质、甜感、口感 */
+  ["aci","swt","mf"].forEach(k=>{
+    const d=DESC.find(x=>x.k===k);
+    const sec=document.createElement('div');sec.className='eval';
+    let cata='';
+    if(k==="mf"){
+      cata='<div class="subsec"><div class="sec-t sub-t">描述性评估 · 属性</div>'+
+        '<div class="dsec"><div class="cata s2">'+MOUTHFEEL_ATTRS.map((a,i)=>
+          `<label><input type="checkbox" class="cata" data-sec="mf" data-t="0" data-i="${i}"><span>${a}</span></label>`).join('')+
+        '</div></div></div>';
+    }
+    const nDesc={aci:"aci_desc",swt:"swt_desc",mf:"mf_desc"}[k];
+    const nEmo={aci:"aci_emo",swt:"swt_emo",mf:"mf_emo"}[k];
+    const phDesc=(NOTES.find(x=>x.k===nDesc)||{}).ph, phEmo=(NOTES.find(x=>x.k===nEmo)||{}).ph;
+    sec.innerHTML=`<div class="sec-t big-t">${d.zh}${k==="mf"?'<span class="en2">Mouthfeel</span>':''}</div>
+      <div class="subsec">
+        <div class="sec-t sub-t">描述性评估</div>
+        <div class="dsec">
+          <div class="dt"><span class="zh">${d.zh}</span><span class="en">${d.en}　强度 0–15</span></div>
+          <div class="int">
+            <label class="int-lb">强度 INTENSITY</label>
+            <div class="rail"><input type="range" min="0" max="15" step="1" value="0" data-sec="${d.k}" oninput="setInt('${d.k}',this.value,true)"></div>
+            <div class="val zero" id="dv_${d.k}" onclick="stepInt('${d.k}',1)">0</div>
+          </div>
+          <div class="ticks"><span>低 0–5</span><span>中 5–10</span><span>高 10–15</span></div>
+        </div>
+        </div>
+      ${cata}
+      ${k==="mf"?noteHTML("mf_attr",(NOTES.find(x=>x.k==="mf_attr")||{}).ph):noteHTML(nDesc,phDesc)}
+      <div class="subsec">
+        <div class="sec-t sub-t">情感性评估</div>
+        <div class="emogrid">${emoHTML(EMO_INDEX[k])}</div>
+        ${noteHTML(nEmo,phEmo)}
+      </div>`;
+    box.appendChild(sec);
+  });
+  /* 综合评估（仅情感评分） */
+  const sec=document.createElement('div');sec.className='eval';
+  const phOvr=(NOTES.find(x=>x.k==="overall")||{}).ph;
+  sec.innerHTML=`<div class="sec-t big-t">综合评估</div>
+    <div class="subsec"><div class="sec-t sub-t">情感性评估</div>
+      <div class="emogrid">${emoHTML(EMO_INDEX.overall)}</div>
+      ${noteHTML("overall",phOvr)}
+    </div>`;
+  box.appendChild(sec);
+})();
+/* 情感性评估子区块的显示标题（与描述性评估对齐；不更动 ITEMS 定义与记录表列名） */
+function emoHTML(i){
+  const it=EMO_TITLE[i]||ITEMS[i];
+  let btns="";
+  for(let n=1;n<=9;n++)btns+=`<button id="b${i}_${n}" onclick="pick(${i},${n})">${n}</button>`;
+  return `<div class="emo">
+    <div class="name"><div class="zh">${it[0]}</div><div class="en">${it[1]}</div></div>
+    <div class="scroller"><div class="pick">${btns}</div></div>
+  </div>`;
+}
+function setInt(k,v,live){
+  const n=Math.max(0,Math.min(15,Math.round(parseFloat(v)||0)));
+  if(!DESC_STATE[k])DESC_STATE[k]={int:0,attrs:[],taste:[]};
+  DESC_STATE[k].int=n;
+  const el=document.querySelector('.int input[data-sec="'+k+'"]');
+  if(el){el.value=n;el.closest('.rail').style.setProperty('--fill',(n/15*100)+'%');}
+  const ve=document.getElementById('dv_'+k);
+  if(ve){ve.textContent=String(n);ve.classList.toggle('zero',n===0)}
+  if(live)saveDesc();
+}
+function stepInt(k,dir){
+  const cur=(DESC_STATE[k]&&DESC_STATE[k].int)||0;
+  const n=Math.max(0,Math.min(15,cur+dir*1));
+  setInt(k,n,true);toast(n?"强度 "+n+" ｜ 点数值可 ±1 微调":"强度已归零");
+}
+/* 配对共用栏位：一次勾选同步写入两个区段 */
+function togglePaired(pair,t,i,el){
+  pair.split(',').forEach(k=>{
+    if(!DESC_STATE[k])DESC_STATE[k]={int:0,attrs:[],taste:[]};
+    const key=t==="1"?"taste":"attrs";
+    const arr=(DESC_STATE[k][key]||[]).slice();
+    const idx=arr.indexOf(i);
+    if(el.checked){if(idx<0)arr.push(i)}else{if(idx>=0)arr.splice(idx,1)}
+    DESC_STATE[k][key]=arr.sort((a,b)=>a-b);
+  });
+  saveDesc();
+  const names=pair.split(',').map(k=>DESC.find(d=>d.k===k).zh).join('、');
+  toast(el.checked?"已套用至 "+names:"已取消 "+names);
+}
+function saveDesc(){try{localStorage.setItem(DKEY,JSON.stringify(DESC_STATE))}catch(e){}
+  if(curRec){const rec=records.find(r=>r.id===curRec);if(rec)rec.desc=JSON.parse(JSON.stringify(DESC_STATE));}
+  autosave()}
+/* 口感独立勾选 */
+function toggleMf(k,i,el){
+  if(!DESC_STATE[k])DESC_STATE[k]={int:0,attrs:[],taste:[]};
+  const arr=(DESC_STATE[k].attrs||[]).slice();
+  const idx=arr.indexOf(i);
+  if(el.checked){if(idx<0)arr.push(i)}else{if(idx>=0)arr.splice(idx,1)}
+  DESC_STATE[k].attrs=arr.sort((a,b)=>a-b);
+  saveDesc();toast(el.checked?"已勾选 "+MOUTHFEEL_ATTRS[i]:"已取消 "+MOUTHFEEL_ATTRS[i]);
+}
+document.addEventListener('change',e=>{
+  const c=e.target.closest('.cata input[type=checkbox]');if(!c)return;
+  if(c.dataset.paired)togglePaired(c.dataset.paired,c.dataset.t,+c.dataset.i,c);
+  else if(c.dataset.sec)toggleMf(c.dataset.sec,+c.dataset.i,c);
+});
+/* 切换样品时，把 DESC_STATE 的快照回填到滑杆 / 勾选框 / 笔记 UI */
+function applyDescUI(){
+  DESC.forEach(sec=>{
+    const st=DESC_STATE[sec.k]||{int:0,attrs:[],taste:[]};
+    /* 1) 强度滑杆 + 数值方块 + 填充条 */
+    const el=document.querySelector('.int input[data-sec="'+sec.k+'"]');
+    if(el){el.value=st.int||0;el.closest('.rail').style.setProperty('--fill',((st.int||0)/15*100)+'%');}
+    const ve=document.getElementById('dv_'+sec.k);
+    if(ve){ve.textContent=String(st.int||0);ve.classList.toggle('zero',(st.int||0)===0);}
+  });
+  /* 2) 共用属性 / 味觉勾选框（干湿、风味余韵）：data-paired 值为 "a,b"，需逐一比对 */
+  document.querySelectorAll('.cata[data-paired]').forEach(c=>{
+    const [a,b]=c.dataset.paired.split(',');
+    const primary=(PAIRED.find(p=>p.a===a&&p.b===b)||{}).primary||b;
+    const st=DESC_STATE[primary]||{attrs:[],taste:[]};
+    const list=c.dataset.t==="1"?st.taste:st.attrs;
+    c.checked=(list||[]).includes(+c.dataset.i);
+  });
+  /* 3) 口感独立勾选框 */
+  (MOUTHFEEL_ATTRS||[]).forEach((_,j)=>{
+    const el=document.querySelector('.cata input[data-sec="mf"][data-t="0"][data-i="'+j+'"]');
+    if(el)el.checked=((DESC_STATE.mf&&DESC_STATE.mf.attrs)||[]).indexOf(j)>=0;
+  });
+}
+function loadDesc(){
+  try{const d=JSON.parse(localStorage.getItem(DKEY));if(d&&typeof d==="object")DESC_STATE=d}catch(e){DESC_STATE={}}
+  DESC.forEach(sec=>{
+    const st=DESC_STATE[sec.k]||{int:0,attrs:[],taste:[]};
+    setInt(sec.k,st.int||0,false);
+    const el=document.querySelector('.int input[data-sec="'+sec.k+'"]');
+    if(el)el.closest('.rail').style.setProperty('--fill',((st.int||0)/15*100)+'%');
+  });
+  /* 共用勾选回填：以 primary 区段的快照为准 */
+  document.querySelectorAll('.cata[data-paired]').forEach(c=>{
+    const [a,b]=c.dataset.paired.split(',');
+    const primary=(PAIRED.find(p=>p.a===a&&p.b===b)||{}).primary||b;
+    const st=DESC_STATE[primary]||{attrs:[],taste:[]};
+    const list=c.dataset.t==="1"?st.taste:st.attrs;
+    c.checked=list.includes(+c.dataset.i);
+  });
+  (MOUTHFEEL_ATTRS||[]).forEach((_,j)=>{
+    const el=document.querySelector('.cata input[data-sec="mf"][data-t="0"][data-i="'+j+'"]');
+    if(el)el.checked=((DESC_STATE.mf&&DESC_STATE.mf.attrs)||[]).indexOf(j)>=0;
+  });
+  fillNotes(DESC_STATE.notes||{});
+}
+
+function scores(){return STATE.map(v=>{const n=parseInt(v,10);return(isNaN(n)||n<1||n>9)?0:n})}
+function calc(){
+  const sc=scores();
+  const sum=sc.reduce((a,b)=>a+b,0);
+  const total=sum>0?Math.round((0.65625*sum+52.75)*100)/100:0;
+  document.getElementById('score').innerHTML=total.toFixed(2)+'<u>分</u>';
+  document.getElementById('cnt').textContent=sc.filter(x=>x>0).length;
+  document.getElementById('bar').style.width=Math.min(100,total)+'%';
+  const v=document.getElementById('verdict');
+  if(!sum)v.textContent="尚未评分";
+  else if(total>=90)v.textContent="卓越 Exceptional";
+  else if(total>=85)v.textContent="优秀 Outstanding";
+  else if(total>=80)v.textContent="良好 Very Good";
+  else if(total>=75)v.textContent="尚可 Good";
+  else v.textContent="待加强 Fair";
+  return{sc,sum,total};
+}
+function pick(i,v){
+  STATE[i]=STATE[i]===v?"":v;
+  for(let n=1;n<=9;n++)document.getElementById(`b${i}_${n}`).classList.toggle('on',STATE[i]==n);
+  calc();
+}
+/* 烘焙程度：1–6 档位，无数值显示 */
+const ROAST_TXT=['极浅','浅','浅中','中','中深','深'];
+/* 烘焙程度：可切换、可取消（checkbox toggle） */
+/* 烘焙程度：checkbox toggle，可选可取（单选互斥 + 再按一次取消）
+   状态由 SAMPLES[SID].roast 决定：0 = 未选择，1–6 = 对应档位 */
+/* 烘焙程度：checkbox toggle，可选可取（单选互斥 + 再按一次取消）
+   状态由 SAMPLES[SID].roast 决定：0 = 未选择，1–6 = 对应档位
+   注：label 点击时浏览器会先把 checkbox 翻转再触发 click，因此以「目标 checkbox
+   是否已勾」作判断依据（el.checked 即为点击后的新状态） */
+function toggleRoast(v,el){
+  const n=Math.max(1,Math.min(6,Math.round(parseFloat(v)||5)));
+  /* 判断「这次点击是否为『选取』」：
+     - label 点击：浏览器先把 checkbox 翻转，el.checked 为新状态 → el.checked===true 表示选取
+     - 直接点击 checkbox：同上
+     因此 el.checked 即为「点击后的目标状态」，可直接判定。 */
+  if(el.checked){
+    /* 选取该档位（单选互斥） */
+    SAMPLES[SID].roast=n;
+    document.querySelectorAll('.roast-pick input[type=checkbox]').forEach(c=>c.checked=false);
+    el.checked=true;   /* 清完后再把目标勾回来，确保视觉高亮 */
+    document.getElementById('roastNow').innerHTML='目前：<b>'+ROAST_TXT[n-1]+'</b>　（'+n+' / 6）';
+    if(window.__roastSync!==false)toast('烘焙程度：'+ROAST_TXT[n-1]);
+  }else{
+    /* 取消选择 */
+    SAMPLES[SID].roast=0;
+    document.getElementById('roastNow').innerHTML='目前：<b>未选择</b>　（0 / 6）';
+    if(window.__roastSync!==false)toast('已取消烘焙程度选择');
+  }
+  persist();
+}
+/* 供「样品切换 / 载入」回填勾选状态用（不触发 toast） */
+function applyRoastUI(){
+  const n=SAMPLES[SID].roast||0;
+  document.querySelectorAll('.roast-pick input[type=checkbox]').forEach(c=>c.checked=false);
+  if(n>0){
+    const el=document.querySelector('.roast-pick input[value="'+n+'"]');
+    if(el)el.checked=true;
+  }
+  const now=document.getElementById('roastNow');
+  if(now)now.innerHTML=n>0?'目前：<b>'+ROAST_TXT[n-1]+'</b>　（'+n+' / 6）':'目前：<b>未选择</b>　（0 / 6）';
+}
+function setRoast(v,sync){
+  const n=Math.max(0,Math.min(6,Math.round(parseFloat(v)||0)));
+  SAMPLES[SID].roast=n;   /* 同步到样品 */
+  applyRoastUI();
+  if(sync===true&&n>0){toast('烘焙程度：'+ROAST_TXT[n-1]);}
+  const cur=records.find(r=>r.id===curRec);if(cur)cur.roast=n;
+  autosave();
+}
+
+/* 输入即时自动存本机 */
+function autosave(){localStorage.setItem(KEY,JSON.stringify(records))}
+
+
+/* ============ 多样品管理 ============ */
+const SKEY="cva_samples_v1";
+let SAMPLES=[],SID=0,PENDING=null;
+/* 空白描述性评估模板：新增样品时一律用这份干净的骨架，
+   绝不可拷贝 DESC_STATE，否则会把当前页已填内容带进新样品。 */
+function blankDesc(){
+  const d={int:0,attrs:[],taste:[],notes:{}};
+  DESC.forEach(sec=>{d[sec.k]={int:0,attrs:[],taste:[]};});
+  return d;
+}
+function defaultSample(i){return{name:"",date:"",cupper:"",roast:0,sc:STATE.slice(),desc:blankDesc()}}
+function loadSamples(){
+  try{const d=JSON.parse(localStorage.getItem(SKEY));if(d&&Array.isArray(d)&&d.length)return d}catch(e){}
+  return Array.from({length:3},(_,i)=>defaultSample(i));
+}
+function persist(){try{localStorage.setItem(SKEY,JSON.stringify(SAMPLES))}catch(e){}}
+function applySetup(){
+  saveCurrent();
+  const n=parseInt(document.getElementById('setupN').value,10);
+  if(!(n>=1&&n<=24)){document.getElementById('setupErr').style.display='block';return}
+  const cur=SAMPLES[SID]||{};
+  DESC_STATE=blankDesc();          /* 新增样品前清空编辑态，避免脏数据带入 */
+  const keep=SAMPLES.slice(0,Math.min(n,SAMPLES.length));
+  while(keep.length<n)keep.push(defaultSample(keep.length));
+  SAMPLES=keep;SID=Math.min(SID,SAMPLES.length-1);
+  persist();buildList();loadSample(SID);closeSetup();
+  toast("已设定 "+n+" 个样品");
+}
+function openSetup(){document.getElementById('setupN').value=SAMPLES.length;document.getElementById('setupErr').style.display='none';document.getElementById('mask').classList.add('on')}
+function closeSetup(){document.getElementById('mask').classList.remove('on')}
+function buildList(){
+  const box=document.getElementById('slist');const cur=document.getElementById('scur');
+  box.innerHTML='<div class="lbl">样品</div>'+SAMPLES.map((s,i)=>{
+    const nm=(s.name||'样品 '+(i+1)).trim();
+    const short=nm.length>4?nm.slice(0,4)+'…':nm;
+    const done=s.sc&&s.sc.some(v=>v!=="");
+    return `<button class="sbtn ${i===SID?'cur':''} ${done?'done':''}" data-i="${i}" onclick="switchS(${i})"><b>${i+1}</b><span>${short}</span></button>`;
+  }).join('')+
+  `<button class="sbtn add" onclick="openSetup()" title="设定样品数量">＋</button>`+
+  `<button class="sbtn set" onclick="openSetup()"><span>设定</span></button>`;
+  if(cur)cur.textContent=(SID+1)+' / '+SAMPLES.length;
+}
+/* ============ 卷动位置记忆（每个样品 × 每个分页各自独立） ============
+   切换样品 / 分页时，先把「当前样品 + 当前分页」的 scrollY 存起来，
+   切换完成后再回到该样品该分页上次停留的位置，避免每次都跳回顶端。
+   同时写入 sessionStorage，重新整理页面也不会遗失。 */
+const SCROLL_KEY="cva_scrollmem_v1";
+const scrollMem={};
+(function loadScrollMem(){
+  try{const d=JSON.parse(sessionStorage.getItem(SCROLL_KEY));
+    if(d&&typeof d==="object"&&!Array.isArray(d))Object.assign(scrollMem,d);}catch(e){}
+})();
+/* 目前所在分页：'desc'（评分/描述）或 'rec'（记录），由 tabbar 决定 */
+let curPage='desc';
+function scrollKey(){return SID+':'+curPage}
+/* 抓取当前位置并存到记忆体 + sessionStorage */
+function captureScroll(){
+  const k=scrollKey();
+  /* 以视觉上真正的滚动容器为准：行动装置多是 document，
+     若 body / documentElement 被程式锁定则改取 .wrap 的 scrollTop */
+  const y=(document.documentElement&&document.documentElement.scrollTop)||document.body.scrollTop||0;
+  const alt=document.querySelector('.wrap')||{};
+  const ay=alt.scrollTop||0;
+  scrollMem[k]=(y>ay?y:ay)||0;
+  try{sessionStorage.setItem(SCROLL_KEY,JSON.stringify(scrollMem))}catch(e){}
+}
+/* 还原位置；setTimeout 是为了等待 display:block 的页面真正上版 */
+let restoreTimer=null;
+function restoreScroll(){
+  const k=scrollKey();
+  const y=scrollMem[k]||0;
+  /* 先清掉待处理的还原，避免多次切换互相干扰 */
+  clearTimeout(restoreTimer);
+  const apply=()=>{window.scrollTo(0,y);
+    const alt=document.querySelector('.wrap');if(alt&&y>0)alt.scrollTop=y;};
+  apply();
+  /* 有些浏览器在 display 切换后会异步重排，因此再补两次 */
+  restoreTimer=setTimeout(apply,0);
+  setTimeout(apply,60);
+}
+/* 清除某个样品（或全部）的记忆，样品被删除时呼叫 */
+function forgetScroll(i){
+  const ks=Object.keys(scrollMem);
+  ks.forEach(k=>{if(i===undefined||k.split(':')[0]===String(i))delete scrollMem[k];});
+  try{sessionStorage.setItem(SCROLL_KEY,JSON.stringify(scrollMem))}catch(e){}
+}
+
+function switchS(i){
+  if(i===SID)return;
+  captureScroll();
+  saveCurrent();SID=i;buildList();loadSample(i);
+  restoreScroll();toast("切换到样品 "+(i+1));
+}
+function saveCurrent(){
+  if(!SAMPLES[SID])return;
+  const{sc}=calc(false);
+  /* 存档前先采集笔记，确保未失焦的输入也被记录 */
+  DESC_STATE.notes=readNotes();
+  const _cupperVal=document.getElementById('cupper').value.trim();
+  window.__CUPER__=_cupperVal;
+  SAMPLES.forEach(s=>{if(s&&s.cupper!==undefined)s.cupper=_cupperVal;});
+  SAMPLES[SID]={name:document.getElementById('sample').value.trim(),
+    date:document.getElementById('cupped').value,
+    cupper:_cupperVal,
+    roast:(()=>{const r=document.querySelector('.roast-pick input:checked');return r?+r.value:0;})(),
+    sc:sc.slice(),desc:JSON.parse(JSON.stringify(DESC_STATE))};
+  persist();
+}
+function loadSample(i){
+  const s=SAMPLES[i];if(!s)return;
+  document.getElementById('sample').value=s.name||"";
+  document.getElementById('cupped').value=s.date||"";
+  document.getElementById('cupper').value=window.__CUPER__||s.cupper||"";
+  if(!s.date)document.getElementById('cupped').valueAsDate=new Date();
+  window.__roastSync=false;applyRoastUI();window.__roastSync=true;
+  STATE.fill("");s.sc.forEach((v,j)=>pick(j,v));
+  if(s.desc){DESC_STATE=JSON.parse(JSON.stringify(s.desc));applyDescUI();}
+  else{DESC_STATE={int:0,attrs:[],taste:[]};
+    DESC.forEach(sec=>DESC_STATE[sec.k]={int:0,attrs:[],taste:[]});
+    applyDescUI();}
+  fillNotes((s.desc&&s.desc.notes)||(DESC_STATE.notes)||{});
+  calc();buildList();
+}
+/* ============ 存档 / 重设 ============ */
+function resetAll(){
+  if(!confirm("确定清空本次 8 项评分？已存的记录不受影响。"))return;
+  STATE.fill("");
+  document.querySelectorAll('.pick button').forEach(b=>b.classList.remove('on'));
+  calc();toast("已清空，可重新评分");
+}
+function saveRec(){
+  const{sc,sum,total}=calc();
+  if(!sum){toast("请先完成至少一项情感性评分");return}
+  if(!document.getElementById('sample').value.trim()){toast("请先填写样品名称");return}
+  if(!document.getElementById('cupped').value){toast("请先填写杯测日期");return}
+  saveCurrent();
+  toast("样品 "+(SID+1)+" 已存档 · "+total.toFixed(2)+" 分");
+}
+function delRec(i,e){e.stopPropagation();
+  if(!confirm("确定删除「"+(SAMPLES[i].name||"样品 "+(i+1))+"」的评分？此动作无法复原。"))return;
+  SAMPLES.splice(i,1);if(!SAMPLES.length)SAMPLES.push(defaultSample(0));
+  forgetScroll(i);
+  SID=Math.min(SID,SAMPLES.length-1);persist();buildList();loadSample(SID);renderRec();
+  toast("已删除该样品评分")}
+function loadRec(i){switchS(i);go('desc');toast("已载入："+(SAMPLES[i].name||"样品 "+(i+1)))}
+function dint(r,i){
+  const d=r.desc;if(!d)return "—";
+  const st=(d&&typeof d==="object"&&!Array.isArray(d))?d[DESC[i]&&DESC[i].k]:null;
+  const n=st&&st.int>0?st.int:0;
+  return n||"—";
+}
+function renderRec(){
+  const empty=document.getElementById('recempty'),tbl=document.getElementById('rectbl'),tb=document.getElementById('rectb');
+  document.getElementById('reccnt').textContent=SAMPLES.length+" 个样品";
+  if(!SAMPLES.length){empty.style.display='block';tbl.style.display='none';return}
+  empty.style.display='none';tbl.style.display='table';
+  const NK=["aroma_attr","aroma_emo","flav_attr","flav_emo","aci_desc","aci_emo","swt_desc","swt_emo","mf_attr","mf_emo","overall"];
+  const NTXT=x=>`<td class="nt">${esc(x)||""}</td>`;
+  tb.innerHTML=SAMPLES.map((s,i)=>{const r=toRec(s,i);
+    const tag=r.total>=85?'style="color:#2f7a4d"':(r.total<75?'style="color:#c8602a"':'');
+    const cur=i===SID?' style="background:rgba(192,154,90,.13)"':'';
+    const n=r.notes||{};
+    /* 评分列 sc 顺序：0干香 1湿香 2风味 3厚度 4余韵 5酸质 6甜感 7综合 */
+    const sc=r.sc.map(x=>`<td>${x||"—"}</td>`).join('');
+    const noteTd=k=>`<td class="nt">${esc(n[k])||""}</td>`;
+    return `<tr${cur} onclick="switchS(${i})"><td class="cupcell">${r.cup}</td>
+      <td style="font-size:10.5px;color:var(--sub)">${r.date}</td><td style="font-size:10.5px;color:var(--sub)">${r.cupper}</td><td class="sc" ${tag}>${r.total.toFixed(2)}</td>
+      ${sc[0]}${noteTd("aroma_attr")}${sc[1]}${noteTd("aroma_emo")}
+      ${sc[2]}${noteTd("flav_attr")}${sc[4]}${noteTd("flav_emo")}
+      ${sc[5]}${noteTd("aci_desc")}${noteTd("aci_emo")}
+      ${sc[6]}${noteTd("swt_desc")}${noteTd("swt_emo")}
+      ${sc[3]}${noteTd("mf_attr")}${noteTd("mf_emo")}
+      ${sc[7]}${noteTd("overall")}
+            ${DESC.map(sec=>`<td class="nt">${esc(attrsTxt(r.desc,sec.k))||""}</td>`).join("")}
+      ${DESC.map(sec=>`<td class="nt">${esc(tasteTxt(r.desc,sec.k))||""}</td>`).join("")}
+      <td style="font-size:10.5px;color:var(--sub)">${(s.roast>0?ROAST_TXT[s.roast-1]:'未选择')}</td><td style="font-size:10.5px;color:var(--sub)">${r.sum}</td>
+      <td class="del" onclick="delRec(${i},event)">✕</td></tr>`;
+  }).join('');
+}
+function toRec(s,i){
+  const sc=s.sc||STATE.slice();
+  const sum=sc.reduce((a,b)=>a+(+b||0),0);
+  const total=sum>0?0.65625*sum+52.75:0;
+  return {id:i,cup:(s.name||"样品 "+(i+1))+"　#"+(i+1),date:s.date||"—",cupper:s.cupper||"—",
+    total,sum,sc,desc:s.desc,notes:(s.desc&&s.desc.notes)||{},roast:s.roast>0?s.roast:0};
+}
+
+/* ============ 另存新档：产生独立 HTML（安卓 / iPhone 都能打开） ============ */
+function buildCVAHeader(){
+  const H=[];
+  /* 基础栏位 */
+  H.push("填表人员","杯测日期","杯测编号","样品名称","烘焙程度");
+  /* 大区块一：描述性评估 */
+  H.push("【描述性评估】");
+  H.push("（一）干香气/湿香气 描述性评估","干香气强度","湿香气强度","干香气/湿香气 属性","香气属性笔记");
+  H.push("（二）风味/余韵 描述性评估","风味强度","余韵强度","风味/余韵属性","风味/余韵味觉","风味/余韵属性笔记");
+  H.push("（三）酸质描述性评估","酸质强度","酸质属性笔记");
+  H.push("（四）甜感描述性评估","甜感强度","甜感属性笔记");
+  H.push("（五）口感描述性评估","口感强度","口感属性","口感属性笔记");
+  /* 大区块二：情感性评估 */
+  H.push("【情感性评估】");
+  H.push("香气情感性笔记","干香 Dry Aroma","湿香 Wet Aroma");
+  H.push("风味/余韵情感性笔记","风味 Flavor","余韵 Aftertaste");
+  H.push("酸质情感性笔记","酸质 Acidity");
+  H.push("甜感情感性笔记","甜感 Sweetness");
+  H.push("口感情感性笔记","口感 Mouthfeel");
+  H.push("综合评估情感性笔记","综合评估 Overall","各项总和","总分");
+  return H;
+}
+/* 单一样品 → 一行（依 buildCVAHeader 顺序） */
+function toCVARow(s,i){
+  const r=toRec(s,i); const d=r.desc||{}; const n=r.notes||{};
+  const L=[];
+  L.push(r.cupper, r.date, "样品"+(i+1)+" #"+(i+1), s.name||"", (s.roast>0?ROAST_TXT[s.roast-1]:"未选择"));
+  /* 描述性评估 */
+  L.push("");
+  L.push("");
+  L.push(d.dry&&d.dry.int||"", d.wet&&d.wet.int||"", attrsTxt(d,"wet")||"", n.aroma_attr||"");
+  L.push("");
+  L.push(d.flav&&d.flav.int||"", d.aft&&d.aft.int||"", attrsTxt(d,"aft")||"", tasteTxt(d,"aft")||"", n.flav_attr||"");
+  L.push("");
+  L.push(d.aci&&d.aci.int||"", n.aci_desc||"");
+  L.push("");
+  L.push(d.swt&&d.swt.int||"", n.swt_desc||"");
+  L.push("");
+  L.push(d.mf&&d.mf.int||"", attrsTxt(d,"mf")||"", n.mf_attr||"");
+  /* 情感性评估 */
+  L.push("");
+  L.push(n.aroma_emo||"", r.sc[0]||"", r.sc[1]||"");
+  L.push(n.flav_emo||"", r.sc[2]||"", r.sc[4]||"");
+  L.push(n.aci_emo||"", r.sc[5]||"");
+  L.push(n.swt_emo||"", r.sc[6]||"");
+  L.push(n.mf_emo||"", r.sc[3]||"");
+  L.push(n.overall||"", r.sc[7]||"", r.sum||"", r.total?r.total.toFixed(2):"");
+  return L;
+}
+
+/* ============ 导出前校验：强度 / 情感评分 / 属性勾选 ============ */
+/* 规则：强度未拖曳、分数未点选、区块有勾选项却一个都没勾，一律禁止输出并提醒。
+   豁免项：填表人、样品名称、文字笔记、杯测日期、烘焙程度、杯测编号 */
+function exportCheck(){
+  const miss=[];
+  /* 1) 描述性强度（7 区段，0–15 滑杆） */
+  DESC.forEach(sec=>{
+    const st=DESC_STATE[sec.k]||{int:0};
+    if(!st.int)miss.push(sec.zh+"强度尚未设定（请拖动滑杆）");
+  });
+  /* 2) 情感性评分（8 项，1–9 点选） */
+  const sc=scores();
+  const EMO_KEYS=["dry","wet","flav","mf","aft","aci","swt","overall"];
+  const EMO_NAMES=["干香","湿香","风味","口感","余韵","酸质","甜感","综合评估"];
+  EMO_KEYS.forEach((k,i)=>{if(!sc[EMO_INDEX[k]])miss.push(EMO_NAMES[i]+"评分尚未点选");});
+  /* 3) 属性勾选：区块有勾选项则至少勾一个 */
+  if(!(DESC_STATE.dry&&DESC_STATE.dry.attrs&&DESC_STATE.dry.attrs.length)||
+     !(DESC_STATE.wet&&DESC_STATE.wet.attrs&&DESC_STATE.wet.attrs.length))
+    miss.push("干香气 / 湿香气属性尚未勾选（该区块至少勾选一项）");
+  if(!(DESC_STATE.flav&&DESC_STATE.flav.attrs&&DESC_STATE.flav.attrs.length)||
+     !(DESC_STATE.aft&&DESC_STATE.aft.attrs&&DESC_STATE.aft.attrs.length))
+    miss.push("风味 / 余韵属性尚未勾选（该区块至少勾选一项）");
+  if(!(DESC_STATE.mf&&DESC_STATE.mf.attrs&&DESC_STATE.mf.attrs.length))
+    miss.push("口感属性尚未勾选（该区块至少勾选一项）");
+  return miss;
+}
+/* CSV 档名：输出日期＋时间＋填表人；填表人未填则用 Cupper 代替 */
+function csvBaseName(cupperVal){
+  const d=new Date();
+  const p=n=>String(n).padStart(2,"0");
+  const ts=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()+"_"+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds());
+  const who=(cupperVal&&cupperVal.trim())?"_"+cupperVal.trim():"_Cupper";
+  return ts+who;
+}
+function makeCsv(list){
+  const rows=list.map((s,i)=>toCVARow(s,i));
+  return "\ufeff"+[buildCVAHeader(),...rows].map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+}
+function downloadCsv(csv,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+/* 「分享此页样品（CSV）」：仅输出当前这一页的样品 */
+function exportPageCSV(){
+  saveCurrent();
+  const cur=SAMPLES[SID];
+  if(!cur){toast("当前分页尚无样品");return}
+  const miss=exportCheck();
+  if(miss.length){alert("尚有以下项目未完成，无法输出：\n\n"+miss.join("\n"));return}
+  const name=(cur.name&&cur.name.trim())?"样品"+(SID+1)+"_"+cur.name.trim():"样品"+(SID+1);
+  downloadCsv(makeCsv([cur],"CVA综合评估_"+name+"_"+csvBaseName(cur.cupper)+".csv"));
+  toast("已输出当前样品 CSV（"+SAMPLES.length+" 个样品中第 "+(SID+1)+" 个）");
+}
+/* 「分享全部样品（CSV）」：全部样品合并成一份 CSV */
+function shareAllCSV(){
+  if(!SAMPLES.length){toast("尚无记录可汇出");return}
+  saveCurrent();
+  const miss=exportCheck();
+  if(miss.length){alert("尚有以下项目未完成，无法输出：\n\n"+miss.join("\n"));return}
+  const who=(SAMPLES[0].cupper&&SAMPLES[0].cupper.trim())?SAMPLES[0].cupper.trim():"Cupper";
+  downloadCsv(makeCsv(SAMPLES,"CVA综合评估_全部样品_"+csvBaseName(who)+".csv"));
+  toast("已输出全部 "+SAMPLES.length+" 个样品 CSV");
+}
+/* 「清除此页样品内容」：清掉本页所有填写，保留填表人姓名 */
+function resetPage(){
+  if(!confirm("确定清除「本页样品」的所有填写内容吗？\n（样品名称、日期、烘焙程度、情感性评分、描述性强度、勾选属性与笔记都会清空；填表人姓名会保留）"))return;
+  clearPageKeepCupper();
+  toast("已清除本页样品内容");
+}
+/* 「清除所有样品内容」：全部清空，包含填表人姓名 */
+function clearAllSamples(){
+  if(!confirm("⚠️ 确定要「清除所有样品内容」吗？\n\n这会清除【全部样品】的所有填写内容与本机记录，包含填表人姓名，且无法复原。"))return;
+  if(!confirm("最后确认：真的要删除全部 " + records.length + " 笔记录吗？"))return;
+  clearEverything(true);
+  toast("已清除所有样品内容");
+}
+function saveFile(){
+  const blob=new Blob(['\ufeff'+buildStandalone(SAMPLES.map((s,i)=>toRec(s,i)))],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download="CVA杯测记录_"+new_date_str()+".html";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+  toast("已另存为独立网页，可用浏览器打开");
+}
+/* 分享（iPhone 原生分享；安卓不支援则改下载） */
+function sharePage(){
+  if(!SAMPLES.length){toast("尚无记录");return}
+  const file=new File(['\ufeff'+buildStandalone(SAMPLES.map((s,i)=>toRec(s,i)))],"CVA咖啡评分记录.html",{type:'text/html'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:"CVA 咖啡评分记录"}).catch(()=>{});
+  }else{
+    toast("本机不支援分享，已改为下载");
+    saveFile();
+  }
+}
+/* 产生一份「自包含」的唯读记录表（含本档全部 CSS，可离线打开） */
+function buildStandalone(recs){
+  /* ============================================================
+     输出结构（依使用者指定顺序）：
+     【描述性评估区块】5 个感官类别
+        1. 干香气/湿香气属性评估（合并：干香属性 + 湿香属性）
+        2. 风味/余韵属性评估（合并：风味属性 + 余韵属性）
+        3. 酸质属性评估
+        4. 口感属性评估
+        5. 甜感属性评估
+        每个类别呈现：强度 → 勾选项 → 笔记
+
+     【情感性评估区块】顺序与命名参照描述性评估
+        1. 干香气/湿香气（合并：干香 + 湿香）
+        2. 风味/余韵（合并：风味 + 余韵）
+        3. 酸质
+        4. 口感
+        5. 甜感
+     ============================================================ */
+
+  /* 描述性评估输出区块定义
+     每个区块：{label, intensity:[{key, label}], attrs:[{key, label}], taste:[{key, label}], notes:[noteKey]} */
+  const DESC_BLOCKS=[
+    {label:"干香气/湿香气属性评估",
+     intensity:[{k:"dry",label:"干香气"},{k:"wet",label:"湿香气"}],
+     attrs:[{k:"dry",label:"干香属性"},{k:"wet",label:"湿香属性"}],
+     taste:[],
+     notes:["aroma_attr","aroma_emo"]},
+    {label:"风味/余韵属性评估",
+     intensity:[{k:"flav",label:"风味"},{k:"aft",label:"余韵"}],
+     attrs:[{k:"flav",label:"风味属性"},{k:"aft",label:"余韵属性"}],
+     taste:[{k:"flav",label:"风味味觉"},{k:"aft",label:"余韵味觉"}],
+     notes:["flav_attr","flav_emo"]},
+    {label:"酸质属性评估",
+     intensity:[{k:"aci",label:"酸质"}],
+     attrs:[{k:"aci",label:"酸质属性"}],
+     taste:[],
+     notes:["aci_desc","aci_emo"]},
+    {label:"口感属性评估",
+     intensity:[{k:"mf",label:"口感"}],
+     attrs:[{k:"mf",label:"口感属性"}],
+     taste:[],
+     notes:["mf_attr","mf_emo"]},
+    {label:"甜感属性评估",
+     intensity:[{k:"swt",label:"甜感"}],
+     attrs:[{k:"swt",label:"甜感属性"}],
+     taste:[],
+     notes:["swt_desc","swt_emo"]}
+  ];
+
+  /* 情感性评估输出区块定义（顺序与命名参照描述性评估） */
+  const EMO_BLOCKS=[
+    {label:"干香气/湿香气", scores:[{idx:0,label:"干香"},{idx:1,label:"湿香"}]},
+    {label:"风味/余韵", scores:[{idx:2,label:"风味"},{idx:4,label:"余韵"}]},
+    {label:"酸质", scores:[{idx:5,label:"酸质"}]},
+    {label:"口感", scores:[{idx:3,label:"口感"}]},
+    {label:"甜感", scores:[{idx:6,label:"甜感"}]},
+    {label:"综合评估", scores:[{idx:7,label:"综合"}]}
+  ];
+
+  /* 笔记 key → 显示标题 */
+  const NK={
+    "aroma_attr":"干香属性笔记","aroma_emo":"湿香情感性笔记",
+    "flav_attr":"风味属性笔记","flav_emo":"余韵情感性笔记",
+    "aci_desc":"酸质属性笔记","aci_emo":"酸质情感性笔记",
+    "swt_desc":"甜感属性笔记","swt_emo":"甜感情感性笔记",
+    "mf_attr":"口感属性笔记","mf_emo":"口感情感性笔记",
+    "overall":"综合评估情感性笔记"
+  };
+
+  /* 表头：基本资讯 + 描述性评估区块 + 情感性评估区块 + 汇总 */
+  let thead=`<th style="text-align:left;padding-left:8px">样品</th><th>日期</th><th>填表人</th><th>烘焙</th>`;
+
+  /* 描述性评估表头（每个区块：强度 + 勾选项 + 味觉 + 笔记） */
+  const thDesc=k=>`<th style="background:#4a6a50;font-size:8.4px;max-width:160px;white-space:normal;line-height:1.35">${k}</th>`;
+  DESC_BLOCKS.forEach(b=>{
+    b.intensity.forEach(x=>{thead+=thDesc(x.label+"强度")});
+    b.attrs.forEach(x=>{thead+=thDesc(x.label)});
+    b.taste.forEach(x=>{thead+=thDesc(x.label)});
+    b.notes.forEach(k=>{thead+=thDesc(NK[k])});
+  });
+
+  /* 情感性评估表头 */
+  const thEmo=k=>`<th style="background:#3a5a80;font-size:8.4px;max-width:120px;white-space:normal;line-height:1.35">${k}</th>`;
+  EMO_BLOCKS.forEach(b=>{
+    b.scores.forEach(x=>{thead+=`<th>${b.label}</th>`});
+    /* 综合评估的情感性笔记 */
+    if(b.label==="综合评估"){thead+=thEmo(NK["overall"])};
+  });
+
+  thead+='<th>各项总和</th><th>情感性总分</th>';
+
+  /* 资料列 */
+  const rows=recs.map(r=>{
+    const n=r.notes||{};
+    const roastTxt=(r.roast>0&&ROAST_TXT&&ROAST_TXT[r.roast-1])?ROAST_TXT[r.roast-1]:"未选择";
+    let tds=`<td style="text-align:left;padding-left:8px">${esc(r.cup)}</td><td>${esc(r.date)}</td><td>${esc(r.cupper)}</td><td>${roastTxt}</td>`;
+
+    /* 描述性评估区块 */
+    DESC_BLOCKS.forEach(b=>{
+      /* 强度 */
+      b.intensity.forEach(x=>{
+        const st=(r.desc&&r.desc[x.k])||{int:0,attrs:[],taste:[]};
+        tds+=`<td style="font-weight:600;color:#2a5a3a">${st.int>0?st.int:"—"}</td>`;
+      });
+      /* 勾选项（属性） */
+      b.attrs.forEach(x=>{
+        const st=(r.desc&&r.desc[x.k])||{int:0,attrs:[],taste:[]};
+        const labels=(ATTR_LABELS[x.k]||[]);
+        const txt=st.attrs&&st.attrs.length?st.attrs.map(i=>labels[i]).join("、"):"";
+        tds+=`<td style="font-size:9.4px;color:#33414f;text-align:left;white-space:normal;word-break:break-word">${esc(txt)||"—"}</td>`;
+      });
+      /* 味觉 */
+      b.taste.forEach(x=>{
+        const st=(r.desc&&r.desc[x.k])||{int:0,attrs:[],taste:[]};
+        const txt=st.taste&&st.taste.length?st.taste.map(i=>TASTE_ATTRS[i]).join("、"):"";
+        tds+=`<td style="font-size:9.4px;color:#33414f;text-align:left;white-space:normal;word-break:break-word">${esc(txt)||"—"}</td>`;
+      });
+      /* 笔记 */
+      b.notes.forEach(k=>{
+        tds+=`<td style="font-size:9.4px;color:#33414f;text-align:left;white-space:normal;word-break:break-word">${esc(n[k])||"—"}</td>`;
+      });
+    });
+
+    /* 情感性评估区块 */
+    EMO_BLOCKS.forEach(b=>{
+      b.scores.forEach(x=>{
+        tds+=`<td>${r.sc[x.idx]||"—"}</td>`;
+      });
+      /* 综合评估的情感性笔记 */
+      if(b.label==="综合评估"){
+        tds+=`<td style="font-size:9.4px;color:#33414f;text-align:left;white-space:normal;word-break:break-word">${esc(n["overall"])||"—"}</td>`;
+      }
+    });
+
+    tds+=`<td>${r.sum}</td><td><b>${r.total.toFixed(2)}</b></td>`;
+    return `<tr>${tds}</tr>`;
+  }).join('');
+
+  return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CVA 咖啡评分记录</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans CJK TC","Noto Sans CJK SC",system-ui,sans-serif;background:#eef1f5;color:#16202c;padding:14px}
+h1{font-size:19px;color:#1f3a5f;display:flex;align-items:center;gap:7px}
+h1::before{content:"☕"}
+.sub{font-size:11px;color:#6b7785;margin:4px 0 12px}
+.card{background:#fff;border:1px solid #e2e7ed;border-radius:14px;padding:5px 11px;margin-bottom:11px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:7px 4px;text-align:center;border-bottom:1px solid #e2e7ed;white-space:nowrap}
+th{color:#fff;font-size:9px;letter-spacing:.5px}
+th.desc-block{background:#4a6a50}
+th.emo-block{background:#3a5a80}
+td:first-child{text-align:left;font-weight:700;color:#1f3a5f;font-size:11.5px}
+.note{font-size:10.5px;color:#6b7785;line-height:1.8;background:#f7f9fb;border-radius:11px;padding:10px 12px}
+.legend{font-size:10px;color:#6b7785;margin:6px 0 10px;line-height:1.7}
+.legend b{color:#1f3a5f}
+</style></head><body>
+<h1>CVA 咖啡评分记录</h1>
+<div class="sub">共 ${recs.length} 笔 · 公式：0.65625 × 各项总和 + 52.75</div>
+<div class="legend">
+  <b>【描述性评估】</b>干香气/湿香气属性评估 → 风味/余韵属性评估 → 酸质属性评估 → 口感属性评估 → 甜感属性评估<br>
+  <b>【情感性评估】</b>干香气/湿香气 → 风味/余韵 → 酸质 → 口感 → 甜感 → 综合评估
+</div>
+<div class="card"><table>
+<thead><tr>${thead}</tr></thead>
+<tbody>${rows}</tbody></table></div>
+<div class="note">本档由「CVA 咖啡评分器」另存产生，可离线用浏览器开启。iPhone 存于「档案」App，安卓存于「下载」App。</div>
+</body></html>`;
+}
+function new_date_str(){return new Date().toISOString().slice(0,10)}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function new_date_str(){return new Date().toISOString().slice(0,10)}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+
+/* ============ 描述性评估：清空 / 汇出 ============ */
+function resetDesc(){
+  if(!confirm("确定清空本页所有强度与勾选？情感性评分与记录不受影响。"))return;
+  DESC_STATE={};
+  try{localStorage.removeItem(DKEY)}catch(e){}
+  DESC.forEach(sec=>{setInt(sec.k,0,false)});
+  document.querySelectorAll('.cata input').forEach(c=>c.checked=false);
+  toast("描述性评估已清空");
+}
+function descSummary(){
+  const ATTRS={dry:AROMA_ATTRS,wet:AROMA_ATTRS,flav:FLAVOR_ATTRS,aft:FLAVOR_ATTRS,mf:MOUTHFEEL_ATTRS};
+  return DESC.map(sec=>{
+    const st=DESC_STATE[sec.k]||{int:0,attrs:[],taste:[]};
+    const a=(st.attrs||[]).map(i=>(ATTRS[sec.k]||[])[i]).join("、");
+    const t=(st.taste||[]).map(i=>TASTE_ATTRS[i]).join("、");
+    return sec.zh+"："+st.int+(a?" ｜ "+a:"")+(t?" ｜ 味觉 "+t:"");
+  }).join("\n");
+}
+
+/* ============ 分页 ============ */
+function go(p,noSave){
+  if(!noSave)saveCurrent();
+  captureScroll();
+  curPage=p;
+  document.querySelectorAll('.page').forEach(e=>e.classList.toggle('on',e.id==='p-'+p));
+  ['desc','rec'].forEach(k=>document.getElementById('t-'+k).classList.toggle('on',k===p));
+  if(p==='rec')renderRec();if(p==='desc')loadDesc();
+  restoreScroll();
+}
+let toastTimer;
+let curRec=null;
+function toast(m){const t=document.getElementById('toast');if(!t)return;t.textContent=m;t.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('on'),1700)}
+
+
+/* ============================================================
+   启动自检清理（v3）：修复旧版「清除了但没清干净」的遗留脏数据
+   - 旧版只把强度/属性归零，未清 notes，且 DESC_STATE 与 SAMPLES[i].desc 不同步
+   - 任何残留的非空 notes / 非零强度 / 非空勾选，一律视为脏数据并清除
+   - 仅首次运行（本机从未打开过此版本）时执行，之后自动跳过
+   ============================================================ */
+/* 启动自检清理（v3）：修复旧版「清除了但没清干净」的遗留脏数据
+   同时清理 DKEY(cva_desc_v1 / DESC_STATE) 与 SKEY(cva_samples_v1 / SAMPLES) 两处数据源 */
+(function(){
+  const VKEY="cva_selfcheck_v3";
+  if(localStorage.getItem(VKEY)==="1")return;
+  let fixed=0;
+  /* 1) 清理 SAMPLES 存档（SKEY） */
+  let samples=[];
+  try{const d=JSON.parse(localStorage.getItem("cva_samples_v1"));if(d&&Array.isArray(d))samples=d.slice()}catch(e){samples=[]}
+  samples.forEach(function(s){
+    if(!s||!s.desc)return;
+    if(s.desc.notes&&Object.keys(s.desc.notes).length){s.desc.notes={};fixed+=1;}
+    Object.keys(s.desc).forEach(function(k){
+      if(k==="notes")return;
+      const st=s.desc[k];
+      if(st&&typeof st==="object"){
+        if(st.int||(st.attrs&&st.attrs.length)||(st.taste&&st.taste.length)){
+          s.desc[k]={int:0,attrs:[],taste:[]};fixed+=1;
+        }
+      }
+    });
+  });
+  try{localStorage.setItem("cva_samples_v1",JSON.stringify(samples))}catch(e){}
+  /* 2) 清理 DESC_STATE（DKEY）—— 这才是画面实际读取的数据源 */
+  try{
+    let desc=JSON.parse(localStorage.getItem("cva_desc_v1"));
+    if(desc&&typeof desc==="object"){
+      if(desc.notes&&Object.keys(desc.notes).length){desc.notes={};fixed+=1;}
+      Object.keys(desc).forEach(function(k){
+        if(k==="notes")return;
+        const st=desc[k];
+        if(st&&typeof st==="object"){
+          if(st.int||(st.attrs&&st.attrs.length)||(st.taste&&st.taste.length)){
+            desc[k]={int:0,attrs:[],taste:[]};fixed+=1;
+          }
+        }
+      });
+      try{localStorage.setItem("cva_desc_v1",JSON.stringify(desc))}catch(e){}
+    }
+  }catch(e){}
+  /* 3) 标记已完成，下次打开跳过 */
+  localStorage.setItem(VKEY,"1");
+  if(fixed)toast("已自动清理旧版残留笔记（"+fixed+" 处），可正常使用了");
+})();
+
+/* ============================================================
+   构建版本号：V + YYMMDD-HH（生成年月日＋时，24 小时制补零）
+   例：2026 年 10 月 15 日 05 点 → V261015-05
+   位置：标题「CVA 综合评估」右侧，小字徽章
+   ------------------------------------------------------------
+   ⚠ 每次重新生成/交付时，只需修改下方 BUILD 字符串即可，
+   V 标签会自动解析并渲染，无需改其他任何地方。
+   ============================================================ */
+(function(){try{
+  const BUILD="2026-10-15T05:00:00+08:00";
+  const d=new Date(BUILD);
+  const p=n=>String(n).padStart(2,"0");
+  const tag="V"+String(d.getFullYear()).slice(2)+p(d.getMonth()+1)+p(d.getDate())+"-"+p(d.getHours());
+  const el=document.getElementById("buildVer");
+  if(el)el.textContent=tag;
+}catch(e){}})();
+
+SAMPLES=loadSamples();buildList();loadSample(SID);
+  if(SAMPLES[SID]&&SAMPLES[SID].cupper){window.__CUPER__=SAMPLES[SID].cupper;document.getElementById('cupper').value=SAMPLES[SID].cupper;}
+document.body.classList.add('with-list');
+calc();renderRec();
+/* 初次载入：若有记忆位置就回到上次停留处 */
+restoreScroll();
+</script>
+  <div class="card" id="spacerCard" aria-hidden="true"></div>
+</body>
+</html>
